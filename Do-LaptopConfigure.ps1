@@ -184,6 +184,12 @@ Function Set-MouseSpeed {
   Set-ItemProperty 'HKCU:\Control Panel\Mouse' -name MouseSensitivity -value $newSpeed
 }
 
+Function TestExistance-ItemProperty($path, $name) {
+	$exists = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+        Write-Verbose "TestExistance-ItemProperty: $exists $($exists -eq $null)"
+	return ($exists -ne $null)
+}
+
 $result = Set-ScreenResolution -Width 1920 -Height 1080
 "Set-ScreenResolution resulted in $result"
 if ($result -ne "Success") {
@@ -201,7 +207,20 @@ powercfg -change -standby-timeout-ac 0
 powercfg -change -standby-timeout-dc 0
 
 # Disable ScreenSaver
-Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name ScreenSaveActive -Value 0
-Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name ScreenSaverIsSecure -Value 0
-Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name ScreenSaveTimeout -Value 0
-Remove-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name SCRNSAVE.EXE
+$scrnPath = "HKCU:\Control Panel\Desktop"
+Set-ItemProperty -Path $scrnPath -Name ScreenSaveActive -Value 0
+Set-ItemProperty -Path $scrnPath -Name ScreenSaverIsSecure -Value 0
+Set-ItemProperty -Path $scrnPath -Name ScreenSaveTimeout -Value 0
+if (TestExistance-ItemProperty -Path $scrnPath -Name "SCRNSAVE.EXE" -Verbose) {
+	Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name SCRNSAVE.EXE
+}
+
+# Set chrome to start
+$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
+$name = "Google_chrome"
+$value = "C:\Program Files\Google\Chrome\Application\chrome.exe -start-maximized"
+if (TestExistance-ItemProperty -Path $runPath -Name $name) {
+	Set-ItemProperty -Path $runPath -Name $name -Value $value
+} else {
+	New-ItemProperty -Path  $runPath -Name $name -Value $value -PropertyType "String"
+}
