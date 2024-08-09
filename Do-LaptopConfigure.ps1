@@ -1,3 +1,6 @@
+# Set-ExecutionPolicy -ExecutionPolicy Undefined
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+
 Set-StrictMode -version latest
 
 Function Set-ScreenResolution { 
@@ -190,14 +193,30 @@ Function TestExistance-ItemProperty($path, $name) {
 	return ($exists -ne $null)
 }
 
+# Set Screen resolution
 $result = Set-ScreenResolution -Width 1920 -Height 1080
 "Set-ScreenResolution resulted in $result"
 if ($result -ne "Success") {
 	Exit
 }
-Disable-NetAdapter -name "Wi-Fi" -confirm:$false
+
+# Hide Wi-Fi and Bluetooth
+Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
 Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -confirm:$false
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "PauseUpdatesExpiryTime" -Value "2024-11-07T00:00:00Z"
+
+# Make windows update not run
+$startDate = "2024-08-07T00:00:00Z"
+$endDate = "2024-11-07T00:00:00Z"
+$winUpPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"
+
+Set-ItemProperty -Name "PauseUpdatesStartTime" -Path $winUpPath -Value $startDate
+Set-ItemProperty -Name "PauseUpdatesExpiryTime" -Path $winUpPath -Value $endDate
+Set-ItemProperty -Name "PauseQualityUpdatesStartTime" -Path $winUpPath -Value $startDate
+Set-ItemProperty -Name "PauseQualityUpdatesExpiryTime" -Path $winUpPath -Value $endDate
+Set-ItemProperty -Name "PauseFeatureUpdatesStartTime" -Path $winUpPath -Value $startDate
+Set-ItemProperty -Name "PauseFeatureUpdatesExpiryTime" -Path $winUpPath -Value $endDate
+
+# Fix Mouse Speed
 Set-MouseSpeed -newSpeed 10
 
 # Disable screen timeout
