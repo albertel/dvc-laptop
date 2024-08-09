@@ -1,1 +1,1 @@
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned; .\Do-LaptopConfigure2.ps1; Set-ExecutionPolicy -ExecutionPolicy Restricted;
+Set-ExecutionPolicy -ExecutionPolicy ByPass; cd \Users\Student\Downloads\; .\Do-LaptopConfigure.ps1; Set-ExecutionPolicy -ExecutionPolicy Restricted;
