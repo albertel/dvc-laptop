@@ -243,3 +243,21 @@ if (TestExistance-ItemProperty -Path $runPath -Name $name) {
 } else {
 	New-ItemProperty -Path  $runPath -Name $name -Value $value -PropertyType "String"
 }
+
+# Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut 
+((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
+
+
+# Set Policy to Hide desktop
+$policyPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$name = "NoDesktop"
+$value = "1"
+if (TestExistance-ItemProperty -Path $policyPath -Name $name) {
+	Set-ItemProperty -Path $policyPath -Name $name -Value $value
+} else {
+	New-ItemProperty -Path  $policyPath -Name $name -Value $value -PropertyType "DWORD"
+}
+
+#
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
+Set-ItemProperty -Path "HKCU:\Control Panel\Colors" -Name Background -Value '0 5 50'
