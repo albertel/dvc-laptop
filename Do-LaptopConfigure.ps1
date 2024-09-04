@@ -1,5 +1,7 @@
-# Set-ExecutionPolicy -ExecutionPolicy Undefined
-# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+# TODO:
+#  More aggressive bluetooth siable
+#  Pin chrome
+#  would be better if we examined the possible screen resoulotions and picked on rather than trying to blindly set one we expect to exist
 
 Set-StrictMode -version latest
 
@@ -195,9 +197,13 @@ Function TestExistance-ItemProperty($path, $name) {
 
 # Set Screen resolution
 $result = Set-ScreenResolution -Width 1920 -Height 1080
-"Set-ScreenResolution resulted in $result"
+"Set-ScreenResolution for 1920x1080 resulted in $result"
 if ($result -ne "Success") {
-	Exit
+	$result = Set-ScreenResolution -Width 1600 -Height 900
+	"Set-ScreenResolution for 1600x900 resulted in $result"
+	if ($result -ne "Success") {
+ 		Exit
+   	}
 }
 
 # Hide Wi-Fi and Bluetooth
@@ -245,7 +251,7 @@ if (TestExistance-ItemProperty -Path $runPath -Name $name) {
 }
 
 # Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut 
-((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
+((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
 
 # Set Policy to Hide desktop
 $policyPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
