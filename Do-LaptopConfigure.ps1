@@ -243,7 +243,17 @@ if (TestExistance-ItemProperty -Path $scrnPath -Name "SCRNSAVE.EXE" -Verbose) {
 # Set chrome to start
 $runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
 $name = "Google_chrome"
-$value = "C:\Program Files\Google\Chrome\Application\chrome.exe -start-maximized"
+
+$chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+if (!(Test-Path -Path $chromePath)) {
+   $chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+   if (!(Test-Path -Path $chromePath)) {
+       "Uname to find Chrome install path"
+       Exit
+   }
+}
+
+$value = $chromePath + " -start-maximized"
 if (TestExistance-ItemProperty -Path $runPath -Name $name) {
 	Set-ItemProperty -Path $runPath -Name $name -Value $value
 } else {
