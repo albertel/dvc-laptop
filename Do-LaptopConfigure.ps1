@@ -195,6 +195,35 @@ Function TestExistance-ItemProperty($path, $name) {
 	return ($exists -ne $null)
 }
 
+
+# MAIN
+
+# Set up a scheduled task on Logon to ask some input and download and run the branched version.
+$args='-command "Read-Host yo;Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://ra
+w.githubusercontent.com/albertel/dvc-laptop/refs/heads/albertel-patch-1/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1;Read-Host second_yo"'
+$taskName = "LaptopConfigure"
+$createTask = $true
+$task=Get-ScheduledTask | Where {$_.TaskName -eq $taskName}
+if ($task -ne $null) {
+  "Found the Task $($task.TaskName)"
+  if ($task.Actions.Arguments -ne $args) {
+     "Needs updating"
+     Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+  } else {
+     $createTask = $false
+  }
+}
+
+if ($createTask) {
+  "Creating task"
+  $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $args
+  $trigger = New-ScheduledTaskTrigger -AtLogOn
+  $settings = New-ScheduledTaskSettingsSet
+  $principal = New-ScheduledTaskPrincipal -UserId "Student" -RunLevel Highest
+  $task = New-ScheduledTask -Principal $principal -Action $action -Trigger $trigger -Settings $settings 
+  Register-ScheduledTask -TaskName $taskName -InputObject $task
+}
+
 # Set Screen resolution
 $resolutions = @(
 	@(1920, 1080),
