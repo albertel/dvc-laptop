@@ -203,7 +203,7 @@ $resolutions = @(
 )
 foreach ($resolution in $resolutions) {
 	$result = Set-ScreenResolution -Width $resolution[0] -Height $resolution[1]
-	"Set-ScreenResolution for -Width $resolution[0] -Height $resolution[1] resulted in $result"
+	"Set-ScreenResolution for $($resolution[0])x$($resolution[1]) resulted in $result"
 }
 $result = Set-ScreenResolution -Width 1920 -Height 1080
 "Set-ScreenResolution for 1920x1080 resulted in $result"
