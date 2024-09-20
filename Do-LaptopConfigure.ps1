@@ -5,7 +5,7 @@
 
 Set-StrictMode -version latest
 "Running version 4"
-$branch="albertel-patch-1"
+$branch="main"
 
 Function Set-ScreenResolution { 
 
