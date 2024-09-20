@@ -1,1 +1,1 @@
-Set-ExecutionPolicy -Force:$true -ExecutionPolicy ByPass; cd \Users\Student\Downloads\; .\Do-LaptopConfigure.ps1; Set-ExecutionPolicy -Force:$true -ExecutionPolicy Restricted;
+Set-ExecutionPolicy -Force:$true -ExecutionPolicy ByPass; cd \Users\Student\Downloads\; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/albertel-patch-1/Do-LaptopConfigure.ps1" -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1; Set-ExecutionPolicy -Force:$true -ExecutionPolicy Restricted;
