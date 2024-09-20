@@ -1,9 +1,11 @@
 # TODO:
 #  More aggressive bluetooth siable
 #  Pin chrome
-#  would be better if we examined the possible screen resoulotions and picked on rather than trying to blindly set one we expect to exist
+#  would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
 
 Set-StrictMode -version latest
+"Running version 4"
+$branch="main"
 
 Function Set-ScreenResolution { 
 
@@ -195,15 +197,55 @@ Function TestExistance-ItemProperty($path, $name) {
 	return ($exists -ne $null)
 }
 
+Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
+	if (TestExistance-ItemProperty -Path $path -Name $name) {
+		Set-ItemProperty -Path $path -Name $name -Value $value
+	} else {
+		New-ItemProperty -Path  $path -Name $name -Value $value -PropertyType $propertytype
+	}
+}
+
+
+# MAIN
+
+# Set up a scheduled task on Logon to ask some input and download and run the branched version.
+$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1;Read-Host second_yo"'
+$taskName = "LaptopConfigure"
+$createTask = $true
+$task=Get-ScheduledTask | Where {$_.TaskName -eq $taskName}
+if ($task -ne $null) {
+  "Found the Task $($task.TaskName)"
+  if ($task.Actions.Arguments -ne $args) {
+     "Needs updating"
+     Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+  } else {
+     "Looks good, leaving it alone"
+     $createTask = $false
+  }
+}
+
+if ($createTask) {
+  "Creating task"
+  $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $args
+  $trigger = New-ScheduledTaskTrigger -AtLogOn
+  $settings = New-ScheduledTaskSettingsSet
+  $principal = New-ScheduledTaskPrincipal -UserId "Student" -RunLevel Highest
+  $task = New-ScheduledTask -Principal $principal -Action $action -Trigger $trigger -Settings $settings 
+  Register-ScheduledTask -TaskName $taskName -InputObject $task
+}
+
 # Set Screen resolution
-$result = Set-ScreenResolution -Width 1920 -Height 1080
-"Set-ScreenResolution for 1920x1080 resulted in $result"
-if ($result -ne "Success") {
-	$result = Set-ScreenResolution -Width 1600 -Height 900
-	"Set-ScreenResolution for 1600x900 resulted in $result"
-	if ($result -ne "Success") {
- 		Exit
-   	}
+$resolutions = @(
+	@(1920, 1080),
+ 	@(1600, 900),
+  	@(1366, 768)
+)
+foreach ($resolution in $resolutions) {
+	$result = Set-ScreenResolution -Width $resolution[0] -Height $resolution[1]
+	"Set-ScreenResolution for $($resolution[0])x$($resolution[1]) resulted in $result"
+ 	if ($result -eq "Success") {
+  		break
+    	}
 }
 
 # Hide Wi-Fi and Bluetooth
@@ -254,14 +296,17 @@ if (!(Test-Path -Path $chromePath)) {
 }
 
 $value = $chromePath + " -start-maximized"
-if (TestExistance-ItemProperty -Path $runPath -Name $name) {
-	Set-ItemProperty -Path $runPath -Name $name -Value $value
-} else {
-	New-ItemProperty -Path  $runPath -Name $name -Value $value -PropertyType "String"
-}
+UpdateOrCreate-ItemProperty -Path  $runPath -Name $name -Value $value -PropertyType "String"
 
 # Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut 
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
+# Further Cleanup, hide the search box/copilot/Taskview/Chat
+$explorerAdvancedPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "ShowTaskViewButton"
+UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "ShowCopilotButton"
+UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "TaskbarMn"
+$searchPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
+UpdateOrCreate-ItemProperty -Path $searchPath  -Value 0 -PropertyType "DWORD" -Name "SearchboxTaskbarMode"
 
 # Set Policy to Hide desktop
 $policyPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
@@ -270,11 +315,7 @@ $value = "1"
 if (!(Test-Path -Path $policyPath)) {
 	New-Item $policyPath -Force
 }
-if (TestExistance-ItemProperty -Path $policyPath -Name $name) {
-	Set-ItemProperty -Path $policyPath -Name $name -Value $value
-} else {
-	New-ItemProperty -Path  $policyPath -Name $name -Value $value -PropertyType "DWORD"
-}
+UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -PropertyType "DWORD"
 
 # Clear background and set to a dark blue
 Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
