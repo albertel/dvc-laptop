@@ -199,7 +199,7 @@ Function TestExistance-ItemProperty($path, $name) {
 # MAIN
 
 # Set up a scheduled task on Logon to ask some input and download and run the branched version.
-$args='-command "Read-Host yo;Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/albertel-patch-1/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1;Read-Host second_yo"'
+$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/albertel-patch-1/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1;Read-Host second_yo"'
 $taskName = "LaptopConfigure"
 $createTask = $true
 $task=Get-ScheduledTask | Where {$_.TaskName -eq $taskName}
