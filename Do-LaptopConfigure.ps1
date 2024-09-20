@@ -196,6 +196,15 @@ Function TestExistance-ItemProperty($path, $name) {
 }
 
 # Set Screen resolution
+$resolutions = @(
+	@(1920, 1080),
+ 	@(1600, 900),
+  	@(1366, 768),
+)
+foreach ($resolution in $resolutions) {
+	$result = Set-ScreenResolution -Width $resolution[0] -Height $resolution[1]
+	"Set-ScreenResolution for -Width $resolution[0] -Height $resolution[1] resulted in $result"
+}
 $result = Set-ScreenResolution -Width 1920 -Height 1080
 "Set-ScreenResolution for 1920x1080 resulted in $result"
 if ($result -ne "Success") {
