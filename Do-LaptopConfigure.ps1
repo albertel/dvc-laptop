@@ -4,6 +4,7 @@
 #  would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
 
 Set-StrictMode -version latest
+"Running version 1"
 
 Function Set-ScreenResolution { 
 
