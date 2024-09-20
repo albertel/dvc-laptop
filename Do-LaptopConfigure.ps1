@@ -209,6 +209,7 @@ if ($task -ne $null) {
      "Needs updating"
      Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
   } else {
+     "Looks good, leaving it alone"
      $createTask = $false
   }
 }
