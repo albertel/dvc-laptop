@@ -1,7 +1,7 @@
 # TODO:
 #  More aggressive bluetooth siable
 #  Pin chrome
-#  would be better if we examined the possible screen resoulotions and picked on rather than trying to blindly set one we expect to exist
+#  would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
 
 Set-StrictMode -version latest
 
