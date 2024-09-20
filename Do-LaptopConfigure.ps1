@@ -198,10 +198,10 @@ Function TestExistance-ItemProperty($path, $name) {
 }
 
 Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
-	if (TestExistance-ItemProperty -Path $policyPath -Name $name) {
-		Set-ItemProperty -Path $policyPath -Name $name -Value $value
+	if (TestExistance-ItemProperty -Path $path -Name $name) {
+		Set-ItemProperty -Path $path -Name $name -Value $value
 	} else {
-		New-ItemProperty -Path  $policyPath -Name $name -Value $value -PropertyType $propertytype
+		New-ItemProperty -Path  $path -Name $name -Value $value -PropertyType $propertytype
 	}
 }
 
