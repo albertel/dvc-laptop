@@ -1,10 +1,10 @@
 # TODO:
-#  More aggressive bluetooth siable
-#  Pin chrome
-#  would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
+#  - More aggressive bluetooth disable
+#  - Pin chrome (impossible?)
+#  - Would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 4"
+"Running version 6"
 $branch="main"
 
 Function Set-ScreenResolution { 
@@ -209,7 +209,7 @@ Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
 # MAIN
 
 # Set up a scheduled task on Logon to ask some input and download and run the branched version.
-$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1;Read-Host second_yo"'
+$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1"'
 $taskName = "LaptopConfigure"
 $createTask = $true
 $task=Get-ScheduledTask | Where {$_.TaskName -eq $taskName}
