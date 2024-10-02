@@ -4,17 +4,21 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 7"
+"Running version 9"
 $branch="albertel-patch-2"
 
-$CSharpSig = @’
-[DllImport(“user32.dll”, EntryPoint = “SystemParametersInfo”)]
+
+UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value 4 -PropertyType "DWORD" -Name "CursorSize"
+UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value 48 -PropertyType "DWORD" -Name "CursorBaseSize"
+
+$CSharpSig = @'
+[DllImport("user32.dll", EntryPoint = "SystemParametersInfo")]
 public static extern bool SystemParametersInfo(
              uint uiAction,
              uint uiParam,
              uint pvParam,
              uint fWinIni);
-‘@
+'@
 $CursorRefresh = Add-Type -MemberDefinition $CSharpSig -Name WinAPICall -Namespace SystemParamInfo –PassThru
 if ($CursorRefresh::SystemParametersInfo(0x0057,0,$null,0)) {
 	  "Set Cursor"
