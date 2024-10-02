@@ -1,11 +1,22 @@
 # TODO:
 #  - More aggressive bluetooth disable
 #  - Pin chrome (impossible?)
-#  - Would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
+#  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 11"
+"Running version 12"
 $branch="albertel-patch-2"
+
+# Persistant global load of external function.
+$winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
+   [DllImport("user32.dll")]
+    public static extern bool SystemParametersInfo(
+       uint uiAction,
+       uint uiParam ,
+       uint pvParam ,
+       uint fWinIni
+    );
+' 
 
 Function Set-ScreenResolution { 
 
@@ -174,15 +185,6 @@ Function Set-MouseSpeed {
       [int] $newSpeed
   )
 
-  $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
-   [DllImport("user32.dll")]
-    public static extern bool SystemParametersInfo(
-       uint uiAction,
-       uint uiParam ,
-       uint pvParam ,
-       uint fWinIni
-    );
-' 
   $SPI_SETMOUSESPEED = 0x0071
   Write-Verbose "$winApi"
   Write-Verbose "MouseSensitivity before WinAPI call: $((Get-ItemProperty 'HKCU:\Control Panel\Mouse').MouseSensitivity)"
@@ -207,27 +209,6 @@ Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
 
 
 # MAIN
-
-UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value 4 -PropertyType "DWORD" -Name "CursorSize"
-UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value 48 -PropertyType "DWORD" -Name "CursorBaseSize"
-$winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
-   [DllImport("user32.dll")]
-    public static extern bool SystemParametersInfo(
-       uint uiAction,
-       uint uiParam ,
-       uint pvParam ,
-       uint fWinIni
-    );
-' 
-
-if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
-	  "Set Cursor"
-} else {
-	"Failed Set Cursor"
-}
-
-Exit
-
 
 # Set up a scheduled task on Logon to ask some input and download and run the branched version.
 $args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1";Read-Host '
@@ -341,3 +322,21 @@ UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -Propert
 # Clear background and set to a dark blue
 Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
 Set-ItemProperty -Path "HKCU:\Control Panel\Colors" -Name Background -Value '0 5 50'
+
+# Fix Mouse Size
+$mouseSize = 2
+$mousePixels = ($mouseSize + 1) * 16
+UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value $mouseSize -PropertyType "DWORD" -Name "CursorSize"
+UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value $mousePixels -PropertyType "DWORD" -Name "CursorBaseSize"
+if ($winApi::SystemParametersInfo(0x2029,0,$mousePixels,0)) {
+	"Set Cursor with $mousePixels"
+} else {
+	"Failed Set Cursor"
+}
+if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
+	"Reload Cursor success"
+} else {
+	"Failed Reload Cursor"
+}
+
+
