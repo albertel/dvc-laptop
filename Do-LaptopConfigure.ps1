@@ -254,6 +254,9 @@ foreach ($resolution in $resolutions) {
 $nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
 foreach ($nicGUID in $nicGUIDs) {
  $regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
+ if (!(Test-Path -Path $regPath)) {
+	New-Item $policyPath -Force
+ }
  UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD
 }
 Restart-Service -Name DusmSvc -Force
