@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 15"
+"Running version 16"
 $branch="albertel-patch-2"
 
 # Persistant global load of external function.
