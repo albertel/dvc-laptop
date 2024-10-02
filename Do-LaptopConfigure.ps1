@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 13"
+"Running version 14"
 $branch="albertel-patch-2"
 
 # Persistant global load of external function.
@@ -250,6 +250,13 @@ foreach ($resolution in $resolutions) {
     	}
 }
 
+# Set Ethernet to Metered
+$nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
+foreach ($nicGUID in $nicGUIDs) {
+ $regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
+ UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 0 -PropertyType DWORD
+}
+Restart-Service -Name DusmSvc -Force
 # Hide Wi-Fi and Bluetooth
 #Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
 Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -confirm:$false
