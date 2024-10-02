@@ -4,29 +4,8 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 10"
+"Running version 11"
 $branch="albertel-patch-2"
-
-
-UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value 4 -PropertyType "DWORD" -Name "CursorSize"
-UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value 48 -PropertyType "DWORD" -Name "CursorBaseSize"
-$winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
-   [DllImport("user32.dll")]
-    public static extern bool SystemParametersInfo(
-       uint uiAction,
-       uint uiParam ,
-       uint pvParam ,
-       uint fWinIni
-    );
-' 
-
-if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
-	  "Set Cursor"
-} else {
-	"Failed Set Cursor"
- }
-
-Exit
 
 Function Set-ScreenResolution { 
 
@@ -228,6 +207,27 @@ Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
 
 
 # MAIN
+
+UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value 4 -PropertyType "DWORD" -Name "CursorSize"
+UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value 48 -PropertyType "DWORD" -Name "CursorBaseSize"
+$winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
+   [DllImport("user32.dll")]
+    public static extern bool SystemParametersInfo(
+       uint uiAction,
+       uint uiParam ,
+       uint pvParam ,
+       uint fWinIni
+    );
+' 
+
+if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
+	  "Set Cursor"
+} else {
+	"Failed Set Cursor"
+}
+
+Exit
+
 
 # Set up a scheduled task on Logon to ask some input and download and run the branched version.
 $args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1";Read-Host '
