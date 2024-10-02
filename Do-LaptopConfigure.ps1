@@ -10,17 +10,17 @@ $branch="albertel-patch-2"
 
 UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value 4 -PropertyType "DWORD" -Name "CursorSize"
 UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value 48 -PropertyType "DWORD" -Name "CursorBaseSize"
+$winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
+   [DllImport("user32.dll")]
+    public static extern bool SystemParametersInfo(
+       uint uiAction,
+       uint uiParam ,
+       uint pvParam ,
+       uint fWinIni
+    );
+' 
 
-$CSharpSig = @'
-[DLLImport("user32.dll", EntryPoint = "SystemParametersInfo")]
-public static extern bool SystemParametersInfo(
-             uint uiAction,
-	     uint uiParam,
-      	     uint pvParam,
-	     uint fWinIni);
-'@
-$CursorRefresh = Add-Type -MemberDefinition $CSharpSig -Name WinAPICall -Namespace SystemParamInfo –PassThru
-if ($CursorRefresh::SystemParametersInfo(0x0057,0,$null,0)) {
+if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
 	  "Set Cursor"
 } else {
 	"Failed Set Cursor"
