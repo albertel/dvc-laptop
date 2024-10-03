@@ -4,8 +4,8 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 16"
-$branch="albertel-patch-2"
+"Running version 17"
+$branch="main"
 
 # Persistant global load of external function.
 $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
@@ -211,7 +211,7 @@ Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
 # MAIN
 
 # Set up a scheduled task on Logon to ask some input and download and run the branched version.
-$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1";Read-Host '
+$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1";'
 $taskName = "LaptopConfigure"
 $createTask = $true
 $task=Get-ScheduledTask | Where {$_.TaskName -eq $taskName}
@@ -253,16 +253,16 @@ foreach ($resolution in $resolutions) {
 # Set Ethernet to Metered
 $nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
 foreach ($nicGUID in $nicGUIDs) {
- $regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
- if (!(Test-Path -Path $regPath)) {
-	New-Item $policyPath -Force
- }
- UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD
+	$regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
+	if (!(Test-Path -Path $regPath)) {
+		New-Item $policyPath -Force
+	}
+	UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD
 }
 Restart-Service -Name DusmSvc -Force
 
 # Hide Wi-Fi and Bluetooth
-#Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
+Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
 Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -confirm:$false
 
 # Make windows update not run
