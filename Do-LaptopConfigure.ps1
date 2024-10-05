@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 17"
+"Running version 18"
 $branch="main"
 
 # Persistant global load of external function.
