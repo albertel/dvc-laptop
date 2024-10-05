@@ -255,7 +255,7 @@ $nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
 foreach ($nicGUID in $nicGUIDs) {
 	$regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
 	if (!(Test-Path -Path $regPath)) {
-		New-Item $policyPath -Force
+		New-Item $regpath -Force
 	}
 	UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD
 }
