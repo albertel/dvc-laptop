@@ -240,7 +240,8 @@ if ($createTask) {
 $resolutions = @(
 	@(1920, 1080),
  	@(1600, 900),
-  	@(1366, 768)
+  	@(1366, 768),
+   	@(1280, 800)
 )
 foreach ($resolution in $resolutions) {
 	$result = Set-ScreenResolution -Width $resolution[0] -Height $resolution[1]
