@@ -1,11 +1,22 @@
 # TODO:
 #  - More aggressive bluetooth disable
 #  - Pin chrome (impossible?)
-#  - Would be better if we examined the possible screen resolutions and picked one rather then tryign a bunch from a list
+#  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 6"
+"Running version 17"
 $branch="main"
+
+# Persistant global load of external function.
+$winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
+   [DllImport("user32.dll")]
+    public static extern bool SystemParametersInfo(
+       uint uiAction,
+       uint uiParam ,
+       uint pvParam ,
+       uint fWinIni
+    );
+' 
 
 Function Set-ScreenResolution { 
 
@@ -174,15 +185,6 @@ Function Set-MouseSpeed {
       [int] $newSpeed
   )
 
-  $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
-   [DllImport("user32.dll")]
-    public static extern bool SystemParametersInfo(
-       uint uiAction,
-       uint uiParam ,
-       uint pvParam ,
-       uint fWinIni
-    );
-' 
   $SPI_SETMOUSESPEED = 0x0071
   Write-Verbose "$winApi"
   Write-Verbose "MouseSensitivity before WinAPI call: $((Get-ItemProperty 'HKCU:\Control Panel\Mouse').MouseSensitivity)"
@@ -247,6 +249,17 @@ foreach ($resolution in $resolutions) {
   		break
     	}
 }
+
+# Set Ethernet to Metered
+$nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
+foreach ($nicGUID in $nicGUIDs) {
+	$regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
+	if (!(Test-Path -Path $regPath)) {
+		New-Item $policyPath -Force
+	}
+	UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD
+}
+Restart-Service -Name DusmSvc -Force
 
 # Hide Wi-Fi and Bluetooth
 Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
@@ -320,3 +333,21 @@ UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -Propert
 # Clear background and set to a dark blue
 Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
 Set-ItemProperty -Path "HKCU:\Control Panel\Colors" -Name Background -Value '0 5 50'
+
+# Fix Mouse Size
+$mouseSize = 2
+$mousePixels = ($mouseSize + 1) * 16
+UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value $mouseSize -PropertyType "DWORD" -Name "CursorSize"
+UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value $mousePixels -PropertyType "DWORD" -Name "CursorBaseSize"
+if ($winApi::SystemParametersInfo(0x2029,0,$mousePixels,0)) {
+	"Set Cursor with $mousePixels"
+} else {
+	"Failed Set Cursor"
+}
+if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
+	"Reload Cursor success"
+} else {
+	"Failed Reload Cursor"
+}
+
+
