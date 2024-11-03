@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 18"
+"Running version 19"
 $branch="main"
 
 # Persistant global load of external function.
@@ -263,7 +263,8 @@ foreach ($nicGUID in $nicGUIDs) {
 Restart-Service -Name DusmSvc -Force
 
 # Hide Wi-Fi and Bluetooth
-Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
+# Disable hiding wi-fi
+# Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
 Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -confirm:$false
 
 # Make windows update not run
