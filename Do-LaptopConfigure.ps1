@@ -4,8 +4,27 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 19"
+"Running version 20"
 $branch="main"
+
+
+"Remove Chrome Autostart"
+$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
+$name = "Google_chrome"
+Remove-ItemProperty -Path $runPath -Name $name
+
+"Stopping Chrome in case it started"
+Get-Process -name Chrome | Stop-Process 
+Start-Sleep -Seconds 5
+
+"Deleting All Profiles"
+Get-ChildItem "$($env:LOCALAPPDATA)\Google\Chrome\User Data\" | Where {$_.Name -like "Default" -or $_.Name -like "Profile*"} | Remove-Item -Recurse
+Remove-Item -Path "$($env:LOCALAPPDATA)\Google\Chrome\User Data\Local state"
+
+"Removing Scheduled Task"
+$taskName = "LaptopConfigure"
+Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+Exit
 
 # Persistant global load of external function.
 $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
