@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 20"
+"Running version 21"
 $branch="main"
 
 
@@ -24,6 +24,7 @@ Remove-Item -Path "$($env:LOCALAPPDATA)\Google\Chrome\User Data\Local state"
 "Removing Scheduled Task"
 $taskName = "LaptopConfigure"
 Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+"Done"
 Exit
 
 # Persistant global load of external function.
