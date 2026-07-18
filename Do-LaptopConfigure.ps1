@@ -6,7 +6,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 23"
+"Running version 24"
 $branch="main"
 
 # Disabling the autoremove
@@ -222,6 +222,7 @@ Function TestExistance-ItemProperty($path, $name) {
 }
 
 Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
+    "UorC-IP $path $name"
 	if (TestExistance-ItemProperty -Path $path -Name $name) {
 		Set-ItemProperty -Path $path -Name $name -Value $value
 	} else {
@@ -353,10 +354,10 @@ if (!(Test-Path -Path $policyPath)) {
 	New-Item $policyPath -Force
 }
 UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -PropertyType "DWORD"
+UpdateOrCreate-ItemProperty -Path $explorereAdvancedPath -Name "HideIcons" -Value 1 -PropertyType "DWORD"
 
 # Clear background and set to a dark blue
-# Disable clear background as it has a good image
-# Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
 Set-ItemProperty -Path "HKCU:\Control Panel\Colors" -Name Background -Value '0 5 50'
 
 # Fix Mouse Size
