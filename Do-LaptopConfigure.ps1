@@ -6,7 +6,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 24"
+"Running version 25"
 $branch="main"
 
 # Disabling the autoremove
