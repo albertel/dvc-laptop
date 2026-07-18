@@ -1,13 +1,15 @@
 # TODO:
 #  - More aggressive bluetooth disable
-#  - Pin chrome (impossible?)
+#  - Pin chrome to taskbar (impossible?)
+#  - Chrome profile auto setup
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
+#  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 22"
+"Running version 23"
 $branch="main"
 
-
+# Disabling the autoremove
 #"Remove Chrome Autostart"
 #$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
 #$name = "Google_chrome"
@@ -231,7 +233,7 @@ Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
 # MAIN
 
 # Set up a scheduled task on Logon to ask some input and download and run the branched version.
-$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\Student\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1"'
+$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\DVC_volunteer\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/Do-LaptopConfigure.ps1 -OutFile Do-LaptopConfigure.ps1; .\Do-LaptopConfigure.ps1"'
 $taskName = "LaptopConfigure"
 $createTask = $true
 $task=Get-ScheduledTask | Where {$_.TaskName -eq $taskName}
@@ -251,7 +253,7 @@ if ($createTask) {
   $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $args
   $trigger = New-ScheduledTaskTrigger -AtLogOn
   $settings = New-ScheduledTaskSettingsSet
-  $principal = New-ScheduledTaskPrincipal -UserId "Student" -RunLevel Highest
+  $principal = New-ScheduledTaskPrincipal -UserId "DVC_volunteer" -RunLevel Highest
   $task = New-ScheduledTask -Principal $principal -Action $action -Trigger $trigger -Settings $settings 
   Register-ScheduledTask -TaskName $taskName -InputObject $task
 }
@@ -353,7 +355,8 @@ if (!(Test-Path -Path $policyPath)) {
 UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -PropertyType "DWORD"
 
 # Clear background and set to a dark blue
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
+# Disable clear background as it has a good image
+# Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
 Set-ItemProperty -Path "HKCU:\Control Panel\Colors" -Name Background -Value '0 5 50'
 
 # Fix Mouse Size
