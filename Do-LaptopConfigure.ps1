@@ -354,7 +354,7 @@ if (!(Test-Path -Path $policyPath)) {
 	New-Item $policyPath -Force
 }
 UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -PropertyType "DWORD"
-UpdateOrCreate-ItemProperty -Path $explorereAdvancedPath -Name "HideIcons" -Value 1 -PropertyType "DWORD"
+UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Name "HideIcons" -Value 1 -PropertyType "DWORD"
 
 # Clear background and set to a dark blue
 Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
