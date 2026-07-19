@@ -1,12 +1,12 @@
 # TODO:
 #  - More aggressive bluetooth disable
 #  - Pin chrome to taskbar (impossible?)
-#  - Chrome profile auto setup
+#  - Chrome profile auto setup (check?)
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 25"
+"Running version 26 w/UserData"
 $branch="main"
 
 # Disabling the autoremove
@@ -320,6 +320,26 @@ if (TestExistance-ItemProperty -Path $scrnPath -Name "SCRNSAVE.EXE" -Verbose) {
 	Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name SCRNSAVE.EXE
 }
 
+
+# Download UserData.tgz
+Start-Sleep -Seconds 5
+"Getting User Data tarball"
+cd \Users\DVC_volunteer\Downloads
+rm  -ErrorAction Ignore UserData.tgz
+Invoke-WebRequest -Uri https://192.168.1.81/UserData.tgz -OutFile UserData.tgz
+
+# Delete Chrome User Data dir
+Start-Sleep -Seconds 5
+"Removing User Data"
+cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
+rm -ErrorAction Ignore -r 'User Data'
+
+# Create new UserData dir
+Start-Sleep -Seconds 5
+"Creating New User Data"
+tar -x -v -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
+
+
 # Set chrome to start
 $runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
 $name = "Google_chrome"
@@ -375,5 +395,5 @@ if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
 } else {
 	"Failed Reload Cursor"
 }
-
+Start-Sleep -Seconds 60
 
