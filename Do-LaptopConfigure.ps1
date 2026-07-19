@@ -6,7 +6,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 26 w/UserData"
+"Running version 27 w/UserData"
 $branch="main"
 
 # Disabling the autoremove
@@ -326,7 +326,7 @@ Start-Sleep -Seconds 5
 "Getting User Data tarball"
 cd \Users\DVC_volunteer\Downloads
 rm  -ErrorAction Ignore UserData.tgz
-Invoke-WebRequest -Uri https://192.168.1.81/UserData.tgz -OutFile UserData.tgz
+Invoke-WebRequest -Uri http://192.168.1.81/UserData.tgz -OutFile UserData.tgz
 
 # Delete Chrome User Data dir
 Start-Sleep -Seconds 5
