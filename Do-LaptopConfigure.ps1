@@ -356,7 +356,7 @@ if (!(Test-Path -Path $chromePath)) {
 
 $value = $chromePath + " -start-maximized"
 #UpdateOrCreate-ItemProperty -Path  $runPath -Name $name -Value $value -PropertyType "String"
-$value
+Start-Process -FilePath $chromePath -WindowStyle Maximized
 
 # Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut 
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
