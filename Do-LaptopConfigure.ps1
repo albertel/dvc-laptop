@@ -6,17 +6,18 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 29 w/UserData"
+"Running version 31 w/UserData"
 $branch="main"
+$ipAddr="192.168.1.81"
 
 # Disabling the autoremove
-"Remove Chrome Autostart"
-$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
-$name = "Google_chrome"
-Remove-ItemProperty -Path $runPath -Name $name
+#"Remove Chrome Autostart"
+#$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
+#$name = "Google_chrome"
+#Remove-ItemProperty -Path $runPath -Name $name
 
 #"Stopping Chrome in case it started"
-#Get-Process -name Chrome | Stop-Process 
+Get-Process -name Chrome | Stop-Process 
 #Start-Sleep -Seconds 5
 
 #"Deleting All Profiles"
@@ -287,7 +288,7 @@ Restart-Service -Name DusmSvc -Force
 
 # Hide Wi-Fi and Bluetooth
 # Disable hiding wi-fi
-# Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
+Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
 Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -confirm:$false
 
 # Make windows update not run
@@ -326,7 +327,7 @@ Start-Sleep -Seconds 5
 "Getting User Data tarball"
 cd \Users\DVC_volunteer\Downloads
 rm  -ErrorAction Ignore UserData.tgz
-Invoke-WebRequest -Uri http://192.168.1.81/UserData.tgz -OutFile UserData.tgz
+Invoke-WebRequest -Uri "http://$ip_Adr/UserData.tgz" -OutFile UserData.tgz
 
 # Delete Chrome User Data dir
 Start-Sleep -Seconds 5
@@ -341,10 +342,6 @@ tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
 
 
 # Launch Chrome
-# Set chrome to start
-$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
-$name = "Google_chrome"
-
 $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 if (!(Test-Path -Path $chromePath)) {
    $chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
@@ -353,10 +350,7 @@ if (!(Test-Path -Path $chromePath)) {
        Exit
    }
 }
-
-$value = $chromePath + " -start-maximized"
-#UpdateOrCreate-ItemProperty -Path  $runPath -Name $name -Value $value -PropertyType "String"
-Start-Process -FilePath $chromePath -WindowStyle Maximized
+Start-Process -FilePath $chromePath -ArgumentList "-start-maximized","http://$ipAddr/gotv"
 
 # Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut 
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
