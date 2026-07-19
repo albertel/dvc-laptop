@@ -327,7 +327,7 @@ Start-Sleep -Seconds 5
 "Getting User Data tarball"
 cd \Users\DVC_volunteer\Downloads
 rm  -ErrorAction Ignore UserData.tgz
-Invoke-WebRequest -Uri "http://$ip_Adr/UserData.tgz" -OutFile UserData.tgz
+Invoke-WebRequest -Uri "http://$ipAddr/UserData.tgz" -OutFile UserData.tgz
 
 # Delete Chrome User Data dir
 Start-Sleep -Seconds 5
