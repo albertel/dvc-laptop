@@ -1,12 +1,11 @@
 # TODO:
 #  - More aggressive bluetooth disable
 #  - Pin chrome to taskbar (impossible?)
-#  - Chrome profile auto setup (check?)
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 32 w/UserData"
+"Running version 33 w/UserData"
 $branch="main"
 $ipAddr="192.168.1.81"
 
@@ -323,20 +322,17 @@ if (TestExistance-ItemProperty -Path $scrnPath -Name "SCRNSAVE.EXE" -Verbose) {
 
 
 # Download UserData.tgz
-Start-Sleep -Seconds 5
 "Getting User Data tarball"
 cd \Users\DVC_volunteer\Downloads
 rm  -ErrorAction Ignore UserData.tgz
 Invoke-WebRequest -Uri "http://$ipAddr/UserData.tgz" -OutFile UserData.tgz
 
 # Delete Chrome User Data dir
-Start-Sleep -Seconds 5
 "Removing User Data"
 cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
 rm -ErrorAction Ignore -r 'User Data'
 
 # Create new UserData dir
-Start-Sleep -Seconds 5
 "Creating New User Data"
 tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
 
