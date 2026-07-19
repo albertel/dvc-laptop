@@ -6,7 +6,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 31 w/UserData"
+"Running version 32 w/UserData"
 $branch="main"
 $ipAddr="192.168.1.81"
 
