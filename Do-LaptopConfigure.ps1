@@ -6,14 +6,14 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 27 w/UserData"
+"Running version 28 w/UserData"
 $branch="main"
 
 # Disabling the autoremove
-#"Remove Chrome Autostart"
-#$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
-#$name = "Google_chrome"
-#Remove-ItemProperty -Path $runPath -Name $name
+"Remove Chrome Autostart"
+$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
+$name = "Google_chrome"
+Remove-ItemProperty -Path $runPath -Name $name
 
 #"Stopping Chrome in case it started"
 #Get-Process -name Chrome | Stop-Process 
@@ -337,9 +337,10 @@ rm -ErrorAction Ignore -r 'User Data'
 # Create new UserData dir
 Start-Sleep -Seconds 5
 "Creating New User Data"
-tar -x -v -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
+tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
 
 
+# Launch Chrome
 # Set chrome to start
 $runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
 $name = "Google_chrome"
@@ -354,7 +355,8 @@ if (!(Test-Path -Path $chromePath)) {
 }
 
 $value = $chromePath + " -start-maximized"
-UpdateOrCreate-ItemProperty -Path  $runPath -Name $name -Value $value -PropertyType "String"
+#UpdateOrCreate-ItemProperty -Path  $runPath -Name $name -Value $value -PropertyType "String"
+$value
 
 # Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut 
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
