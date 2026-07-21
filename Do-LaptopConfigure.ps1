@@ -5,9 +5,12 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 33 w/UserData"
+"Running version 34 w/UserData"
 $branch="main"
-$ipAddr="192.168.1.81"
+# home
+#$ipAddr="192.168.1.81"
+# DVC
+$ipAddr="10.50.7.1"
 
 # Disabling the autoremove
 #"Remove Chrome Autostart"
