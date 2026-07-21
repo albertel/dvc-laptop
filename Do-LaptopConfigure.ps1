@@ -330,14 +330,19 @@ cd \Users\DVC_volunteer\Downloads
 rm  -ErrorAction Ignore UserData.tgz
 Invoke-WebRequest -Uri "http://$ipAddr/UserData.tgz" -OutFile UserData.tgz
 
-# Delete Chrome User Data dir
-"Removing User Data"
-cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
-rm -ErrorAction Ignore -r 'User Data'
+if (Test-Path -Path UserData.tgz) {
+	# Delete Chrome User Data dir
+	"Removing User Data"
+	cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
+	rm -ErrorAction Ignore -r 'User Data'
 
-# Create new UserData dir
-"Creating New User Data"
-tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
+	# Create new UserData dir
+	"Creating New User Data"
+	tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
+} else {
+	"Unable to download UserData, will not reset Chrome, pausing for 1 minute"
+	Start-Sleep -Seconds 60
+}
 
 
 # Launch Chrome
