@@ -16,4 +16,4 @@ rm -r Default/DawnGraphiteCache
 rm -r Default/DawnWebGPUCache
 cd ..
 tar -c -v -z -f UserData.test.tgz "User Data"
-scp UserData.test.tgz dvc@192.168.1.81:/var/www/html
+scp UserData.test.tgz dvc@10.50.7.1:/var/www/html
