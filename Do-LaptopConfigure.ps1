@@ -373,8 +373,8 @@ if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
 	"Failed Reload Cursor"
 }
 
-"Normal setup done, wait 60 then start chrome"
-Start-Sleep -Seconds 60
+"Normal setup done, wait 6 then start chrome"
+Start-Sleep -Seconds 6
 
 # Download UserData.tgz
 Function Reset-UserData {
