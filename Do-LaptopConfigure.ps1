@@ -5,12 +5,12 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 38 w/ChromeEnterprise+Leveldatareset"
+"Running version 39 w/ChromeEnterprise+Leveldatareset"
 $branch="main"
 # home
-$ipAddr="192.168.1.193"
+# $ipAddr="192.168.1.193"
 # DVC
-#$ipAddr="10.50.7.1"
+$ipAddr="10.50.7.1"
 
 
 # Attempts to reset various global settings on the machine 
