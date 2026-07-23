@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 36 w/UserData"
+"Running version 37 w/ChromeEnterprise"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
