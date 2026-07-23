@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 35 w/UserData"
+"Running version 36 w/UserData"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
@@ -304,8 +304,8 @@ Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:
 Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -confirm:$false
 
 # Make windows update not run
-$startDate = "2024-08-07T00:00:00Z"
-$endDate = "2024-11-07T00:00:00Z"
+$startDate = "2026-07-07T00:00:00Z"
+$endDate = "2026-11-07T00:00:00Z"
 $winUpPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"
 
 Set-ItemProperty -Name "PauseUpdatesStartTime" -Path $winUpPath -Value $startDate
