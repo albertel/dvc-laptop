@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 37 w/ChromeEnterprise"
+"Running version 38 w/ChromeEnterprise+Leveldatareset"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
@@ -384,13 +384,11 @@ Function Reset-UserData {
 	Invoke-WebRequest -Uri "http://$ipAddr/UserData.tgz" -OutFile UserData.tgz
 
 	if (Test-Path -Path UserData.tgz) {
-		# Delete Chrome User Data dir
-		"Removing User Data"
+		"Removing User Data Local Storage"
 		cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
 		rm -ErrorAction Ignore -r 'User Data\Default\Local Storage\leveldb'
 
-		# Create new UserData dir
-		"Creating New User Data"
+		"Creating New User Data Local Storage"
 		tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
 	} else {
 		"Unable to download UserData, will not reset Chrome, pausing for 1 minute"
