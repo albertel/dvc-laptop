@@ -12,25 +12,35 @@ $branch="main"
 # DVC
 $ipAddr="10.50.7.1"
 
-# Disabling the autoremove
-#"Remove Chrome Autostart"
-#$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
-#$name = "Google_chrome"
-#Remove-ItemProperty -Path $runPath -Name $name
 
-#"Stopping Chrome in case it started"
-Get-Process -name Chrome | Stop-Process 
-#Start-Sleep -Seconds 5
+# Attempts to reset various global settings on the machine 
+Function Reset {
+	# Disabling the autoremove
+	"Remove Chrome Autostart"
+	$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
+	$name = "Google_chrome"
+	Remove-ItemProperty -Path $runPath -Name $name
 
-#"Deleting All Profiles"
-#Get-ChildItem "$($env:LOCALAPPDATA)\Google\Chrome\User Data\" | Where {$_.Name -like "Default" -or $_.Name -like "Profile*"} | Remove-Item -Recurse
-#Remove-Item -Path "$($env:LOCALAPPDATA)\Google\Chrome\User Data\Local state"
+	#"Stopping Chrome in case it started"
+	Get-Process -name Chrome | Stop-Process 
+	Start-Sleep -Seconds 5
 
-#"Removing Scheduled Task"
-#$taskName = "LaptopConfigure"
-#Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
-#"Done"
-#Exit
+	#"Deleting All Profiles"
+	Get-ChildItem "$($env:LOCALAPPDATA)\Google\Chrome\User Data\" | Where {$_.Name -like "Default" -or $_.Name -like "Profile*"} | Remove-Item -Recurse
+	Remove-Item -Path "$($env:LOCALAPPDATA)\Google\Chrome\User Data\Local state"
+
+	"Removing Scheduled Task"
+	$taskName = "LaptopConfigure"
+	Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+	"Done"
+
+	#MISSING
+	# Wired/Bluetooth adapters disabled
+	# Windows Update disabled
+	# Wired set to metered
+	
+	Exit
+}
 
 # Persistant global load of external function.
 $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
@@ -323,39 +333,6 @@ if (TestExistance-ItemProperty -Path $scrnPath -Name "SCRNSAVE.EXE" -Verbose) {
 	Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name SCRNSAVE.EXE
 }
 
-
-# Download UserData.tgz
-"Getting User Data tarball"
-cd \Users\DVC_volunteer\Downloads
-rm  -ErrorAction Ignore UserData.tgz
-Invoke-WebRequest -Uri "http://$ipAddr/UserData.tgz" -OutFile UserData.tgz
-
-if (Test-Path -Path UserData.tgz) {
-	# Delete Chrome User Data dir
-	"Removing User Data"
-	cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
-	rm -ErrorAction Ignore -r 'User Data'
-
-	# Create new UserData dir
-	"Creating New User Data"
-	tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
-} else {
-	"Unable to download UserData, will not reset Chrome, pausing for 1 minute"
-	Start-Sleep -Seconds 60
-}
-
-
-# Launch Chrome
-$chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-if (!(Test-Path -Path $chromePath)) {
-   $chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-   if (!(Test-Path -Path $chromePath)) {
-       "Uname to find Chrome install path"
-       Exit
-   }
-}
-Start-Process -FilePath $chromePath -ArgumentList "-start-maximized","http://$ipAddr/gotv"
-
 # Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut 
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
 # Further Cleanup, hide the search box/copilot/Taskview/Chat
@@ -395,5 +372,43 @@ if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
 } else {
 	"Failed Reload Cursor"
 }
+
 Start-Sleep -Seconds 60
+
+# Download UserData.tgz
+Function Reset-UserData {
+	"Getting User Data tarball"
+	cd \Users\DVC_volunteer\Downloads
+	rm  -ErrorAction Ignore UserData.tgz
+	Invoke-WebRequest -Uri "http://$ipAddr/UserData.tgz" -OutFile UserData.tgz
+
+	if (Test-Path -Path UserData.tgz) {
+		# Delete Chrome User Data dir
+		"Removing User Data"
+		cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
+		rm -ErrorAction Ignore -r 'User Data'
+
+		# Create new UserData dir
+		"Creating New User Data"
+		tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
+	} else {
+		"Unable to download UserData, will not reset Chrome, pausing for 1 minute"
+		Start-Sleep -Seconds 60
+	}
+}
+# Reset-UserData
+
+UpdateOrCreate-ItemProperty -Path "HKLM:\Software\Policies\Google\Chrome" -Name "CloudManagementEnrollmentToken" -Value "b4e26334-0705-44dd-b71a-004540b0a2c6"
+
+# Launch Chrome
+$chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+if (!(Test-Path -Path $chromePath)) {
+   $chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+   if (!(Test-Path -Path $chromePath)) {
+       "Uname to find Chrome install path"
+       Exit
+   }
+}
+Start-Process -FilePath $chromePath -ArgumentList "-start-maximized","http://$ipAddr/gotv"
+
 
