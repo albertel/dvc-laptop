@@ -387,7 +387,7 @@ Function Reset-UserData {
 		# Delete Chrome User Data dir
 		"Removing User Data"
 		cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
-		rm -ErrorAction Ignore -r 'User Data'
+		rm -ErrorAction Ignore -r 'User Data\Default\Local Storage\leveldb'
 
 		# Create new UserData dir
 		"Creating New User Data"
@@ -397,7 +397,6 @@ Function Reset-UserData {
 		Start-Sleep -Seconds 60
 	}
 }
-# Reset-UserData
 
 "Set Chrome Policy key"
 $policyPath = "HKLM:\SOFTWARE\Policies\Google\Chrome"
@@ -405,6 +404,9 @@ if (!(Test-Path -Path $policyPath)) {
 	New-Item $policyPath -Force
 }
 UpdateOrCreate-ItemProperty -Path $policyPath -Name "CloudManagementEnrollmentToken" -Value "b4e26334-0705-44dd-b71a-004540b0a2c6"
+
+"Resetting leveldb"
+Reset-UserData
 
 # Launch Chrome
 $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
