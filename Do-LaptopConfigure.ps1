@@ -5,12 +5,12 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 34 w/UserData"
+"Running version 35 w/UserData"
 $branch="main"
 # home
-#$ipAddr="192.168.1.81"
+$ipAddr="192.168.1.193"
 # DVC
-$ipAddr="10.50.7.1"
+#$ipAddr="10.50.7.1"
 
 
 # Attempts to reset various global settings on the machine 
