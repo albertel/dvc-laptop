@@ -315,7 +315,7 @@ Set-ItemProperty -Name "PauseQualityUpdatesExpiryTime" -Path $winUpPath -Value $
 Set-ItemProperty -Name "PauseFeatureUpdatesStartTime" -Path $winUpPath -Value $startDate
 Set-ItemProperty -Name "PauseFeatureUpdatesExpiryTime" -Path $winUpPath -Value $endDate
 
-# Fix Mouse Speed
+"Fix Mouse Speed"
 Set-MouseSpeed -newSpeed 10
 
 # Disable screen timeout
@@ -324,7 +324,7 @@ powercfg -change -monitor-timeout-dc 0
 powercfg -change -standby-timeout-ac 0
 powercfg -change -standby-timeout-dc 0
 
-# Disable ScreenSaver
+"Disable ScreenSaver"
 $scrnPath = "HKCU:\Control Panel\Desktop"
 Set-ItemProperty -Path $scrnPath -Name ScreenSaveActive -Value 0
 Set-ItemProperty -Path $scrnPath -Name ScreenSaverIsSecure -Value 0
@@ -333,7 +333,7 @@ if (TestExistance-ItemProperty -Path $scrnPath -Name "SCRNSAVE.EXE" -Verbose) {
 	Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name SCRNSAVE.EXE
 }
 
-# Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut 
+"Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
 # Further Cleanup, hide the search box/copilot/Taskview/Chat
 $explorerAdvancedPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -343,7 +343,7 @@ UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "
 $searchPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
 UpdateOrCreate-ItemProperty -Path $searchPath  -Value 0 -PropertyType "DWORD" -Name "SearchboxTaskbarMode"
 
-# Set Policy to Hide desktop
+"Set Policy to Hide desktop"
 $policyPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
 $name = "NoDesktop"
 $value = "1"
@@ -353,11 +353,11 @@ if (!(Test-Path -Path $policyPath)) {
 UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -PropertyType "DWORD"
 UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Name "HideIcons" -Value 1 -PropertyType "DWORD"
 
-# Clear background and set to a dark blue
+"Clear background and set to a dark blue"
 Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
 Set-ItemProperty -Path "HKCU:\Control Panel\Colors" -Name Background -Value '0 5 50'
 
-# Fix Mouse Size
+"Fix Mouse Size"
 $mouseSize = 2
 $mousePixels = ($mouseSize + 1) * 16
 UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value $mouseSize -PropertyType "DWORD" -Name "CursorSize"
@@ -373,6 +373,7 @@ if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
 	"Failed Reload Cursor"
 }
 
+"Normal setup done, wait 60 then start chrome"
 Start-Sleep -Seconds 60
 
 # Download UserData.tgz
@@ -398,7 +399,12 @@ Function Reset-UserData {
 }
 # Reset-UserData
 
-UpdateOrCreate-ItemProperty -Path "HKLM:\Software\Policies\Google\Chrome" -Name "CloudManagementEnrollmentToken" -Value "b4e26334-0705-44dd-b71a-004540b0a2c6"
+"Set Chrome Policy key"
+$policyPath = "HKLM:\SOFTWARE\Policies\Google\Chrome"
+if (!(Test-Path -Path $policyPath)) {
+	New-Item $policyPath -Force
+}
+UpdateOrCreate-ItemProperty -Path $policyPath -Name "CloudManagementEnrollmentToken" -Value "b4e26334-0705-44dd-b71a-004540b0a2c6"
 
 # Launch Chrome
 $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
