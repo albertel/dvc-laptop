@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 40 w/ChromeEnterprise+DVC"
+"Running version 41 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -373,9 +373,6 @@ if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
 	"Failed Reload Cursor"
 }
 
-"Normal setup done, wait 6 then start chrome"
-Start-Sleep -Seconds 6
-
 # Download UserData.tgz
 Function Reset-UserData {
 	"Getting User Data tarball"
@@ -415,6 +412,6 @@ if (!(Test-Path -Path $chromePath)) {
        Exit
    }
 }
-Start-Process -FilePath $chromePath -ArgumentList "-start-maximized","http://$ipAddr/gotv"
+Start-Process -FilePath $chromePath -ArgumentList "-start-maximized"
 
 
