@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 41 w/ChromeEnterprise+DVC"
+"Running version 42 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -400,8 +400,8 @@ if (!(Test-Path -Path $policyPath)) {
 }
 UpdateOrCreate-ItemProperty -Path $policyPath -Name "CloudManagementEnrollmentToken" -Value "462375fb-28ab-4a03-a9fd-9b4072f35341"
 
-"Resetting leveldb"
-Reset-UserData
+#"Resetting leveldb"
+#Reset-UserData
 
 # Launch Chrome
 $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
