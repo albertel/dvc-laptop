@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 39 w/ChromeEnterprise+Leveldatareset"
+"Running version 40 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -401,7 +401,7 @@ $policyPath = "HKLM:\SOFTWARE\Policies\Google\Chrome"
 if (!(Test-Path -Path $policyPath)) {
 	New-Item $policyPath -Force
 }
-UpdateOrCreate-ItemProperty -Path $policyPath -Name "CloudManagementEnrollmentToken" -Value "b4e26334-0705-44dd-b71a-004540b0a2c6"
+UpdateOrCreate-ItemProperty -Path $policyPath -Name "CloudManagementEnrollmentToken" -Value "462375fb-28ab-4a03-a9fd-9b4072f35341"
 
 "Resetting leveldb"
 Reset-UserData
