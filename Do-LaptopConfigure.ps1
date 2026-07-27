@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 48 w/ChromeEnterprise+DVC"
+"Running version 49 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
@@ -307,6 +307,7 @@ foreach ($nicGUID in $nicGUIDs) {
 		New-Item $regpath -Force
 	}
 	" ... $regpath"
+	UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD
 	if (UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD) {
 		"... Doing restart for $regpath"
 		Restart-Service -Name DusmSvc -Force
