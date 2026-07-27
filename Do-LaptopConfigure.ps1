@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 53 w/ChromeEnterprise+DVC"
+"Running version 54 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
@@ -302,14 +302,11 @@ foreach ($resolution in $resolutions) {
 "Set Ethernet to Metered"
 $nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
 foreach ($nicGUID in $nicGUIDs) {
-	"foreach $nicGUID"
 	$regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
 	if (!(Test-Path -Path $regPath)) {
 		New-Item $regpath -Force
 	}
-	" ... $regpath"
 	$ret = UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD
-	" ... $ret"
 	if ($ret) {
 		"... Doing restart for $regpath"
 		Restart-Service -Name DusmSvc -Force
@@ -357,11 +354,11 @@ if (TestExistance-ItemProperty -Path $scrnPath -Name "SCRNSAVE.EXE" -Verbose) {
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
 # Further Cleanup, hide the search box/copilot/Taskview/Chat
 $explorerAdvancedPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
-UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "ShowTaskViewButton"
-UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "ShowCopilotButton"
-UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "TaskbarMn"
+$ret = UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "ShowTaskViewButton"
+$ret = UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "ShowCopilotButton"
+$ret = UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Value 0 -PropertyType "DWORD" -Name "TaskbarMn"
 $searchPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
-UpdateOrCreate-ItemProperty -Path $searchPath  -Value 0 -PropertyType "DWORD" -Name "SearchboxTaskbarMode"
+$ret = UpdateOrCreate-ItemProperty -Path $searchPath  -Value 0 -PropertyType "DWORD" -Name "SearchboxTaskbarMode"
 
 "Set Policy to Hide desktop"
 $policyPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
@@ -370,8 +367,8 @@ $value = "1"
 if (!(Test-Path -Path $policyPath)) {
 	New-Item $policyPath -Force
 }
-UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -PropertyType "DWORD"
-UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Name "HideIcons" -Value 1 -PropertyType "DWORD"
+$ret = UpdateOrCreate-ItemProperty -Path $policyPath -Name $name -Value $value -PropertyType "DWORD"
+$ret = UpdateOrCreate-ItemProperty -Path $explorerAdvancedPath -Name "HideIcons" -Value 1 -PropertyType "DWORD"
 
 "Clear background and set to a dark blue"
 Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -Value ''
@@ -380,8 +377,8 @@ Set-ItemProperty -Path "HKCU:\Control Panel\Colors" -Name Background -Value '0 5
 "Fix Mouse Size"
 $mouseSize = 2
 $mousePixels = ($mouseSize + 1) * 16
-UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value $mouseSize -PropertyType "DWORD" -Name "CursorSize"
-UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value $mousePixels -PropertyType "DWORD" -Name "CursorBaseSize"
+$ret = UpdateOrCreate-ItemProperty -Path "HKCU:\Software\Microsoft\Accessibility" -Value $mouseSize -PropertyType "DWORD" -Name "CursorSize"
+$ret = UpdateOrCreate-ItemProperty -Path "HKCU:\Control Panel\Cursors" -Value $mousePixels -PropertyType "DWORD" -Name "CursorBaseSize"
 if ($winApi::SystemParametersInfo(0x2029,0,$mousePixels,0)) {
 	"Set Cursor with $mousePixels"
 } else {
@@ -418,7 +415,7 @@ $policyPath = "HKLM:\SOFTWARE\Policies\Google\Chrome"
 if (!(Test-Path -Path $policyPath)) {
 	New-Item $policyPath -Force
 }
-UpdateOrCreate-ItemProperty -Path $policyPath -Name "CloudManagementEnrollmentToken" -Value "462375fb-28ab-4a03-a9fd-9b4072f35341"
+$ret = UpdateOrCreate-ItemProperty -Path $policyPath -Name "CloudManagementEnrollmentToken" -Value "462375fb-28ab-4a03-a9fd-9b4072f35341"
 
 #"Resetting leveldb"
 Reset-UserData
