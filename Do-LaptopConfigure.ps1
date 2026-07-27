@@ -8,10 +8,9 @@ Set-StrictMode -version latest
 "Running version 44 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
-# $ipAddr="192.168.1.193"
+$ipAddr="192.168.1.193"
 # DVC
-$ipAddr="10.50.7.1"
-
+# $ipAddr="10.50.7.1"
 
 # Attempts to reset various global settings on the machine 
 Function Reset {
@@ -237,9 +236,18 @@ Function TestExistance-ItemProperty($path, $name) {
 Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
     "UorC-IP $path $name"
 	if (TestExistance-ItemProperty -Path $path -Name $name) {
-		Set-ItemProperty -Path $path -Name $name -Value $value
+		$curValue = Get-ItemPropertyValue -Path $policyPath -Name "CloudManagementEnrollmentToken"
+		if ($curValue -ne $value) {
+			"     Setting"
+			Set-ItemProperty -Path $path -Name $name -Value $value
+			return $true
+		} else {
+			"     Not Setting"
+			return $false
+		}
 	} else {
 		New-ItemProperty -Path  $path -Name $name -Value $value -PropertyType $propertytype
+		return $true
 	}
 }
 
