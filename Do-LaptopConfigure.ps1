@@ -5,12 +5,15 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 46 w/ChromeEnterprise+DVC"
+"Running version 47 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
 # DVC
 # $ipAddr="10.50.7.1"
+
+"Stopping Chrome in case it started"
+Get-Process -name Chrome | Stop-Process 
 
 # Attempts to reset various global settings on the machine 
 Function Reset {
@@ -302,9 +305,12 @@ foreach ($nicGUID in $nicGUIDs) {
 	if (!(Test-Path -Path $regPath)) {
 		New-Item $regpath -Force
 	}
-	UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD
+	if (UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD) {
+		Restart-Service -Name DusmSvc -Force
+	} else {
+		"Skipping restart"
+	}
 }
-Restart-Service -Name DusmSvc -Force
 
 # Hide Wi-Fi and Bluetooth
 # Disable hiding wi-fi
@@ -341,7 +347,7 @@ if (TestExistance-ItemProperty -Path $scrnPath -Name "SCRNSAVE.EXE" -Verbose) {
 	Remove-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name SCRNSAVE.EXE
 }
 
-"Cleanup TaskBar, doesn;t handle file explorer/shutdown shortcut"
+"Cleanup TaskBar, doesn't handle file explorer/shutdown shortcut"
 ((New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items() | Where { -not ($_.Name -like "*Chrome*")} | ?{$_.Name}).Verbs() | ?{$_.Name.Replace('&', '') -match 'Unpin from taskbar'} | %{$_.DoIt(); $exec = $true}
 # Further Cleanup, hide the search box/copilot/Taskview/Chat
 $explorerAdvancedPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -391,7 +397,7 @@ Function Reset-UserData {
 	if (Test-Path -Path UserData.tgz) {
 		"Removing User Data Local Storage"
 		cd \Users\DVC_volunteer\AppData\Local\Google\Chrome
-		rm -ErrorAction Ignore -r 'User Data\Default\Local Storage\leveldb'
+		rm -r 'User Data\Default\Local Storage\leveldb'
 
 		"Creating New User Data Local Storage"
 		tar -x -z -f c:\Users\DVC_volunteer\Downloads\UserData.tgz
