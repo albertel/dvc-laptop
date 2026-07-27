@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 45 w/ChromeEnterprise+DVC"
+"Running version 46 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
@@ -236,7 +236,7 @@ Function TestExistance-ItemProperty($path, $name) {
 Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
     "UorC-IP $path $name"
 	if (TestExistance-ItemProperty -Path $path -Name $name) {
-		$curValue = Get-ItemPropertyValue -Path $policyPath -Name "CloudManagementEnrollmentToken"
+		$curValue = Get-ItemPropertyValue -Path $path -Name $name
 		if ($curValue -ne $value) {
 			"     Setting"
 			Set-ItemProperty -Path $path -Name $name -Value $value
