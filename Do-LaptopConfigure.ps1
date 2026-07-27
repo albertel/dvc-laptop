@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 51 w/ChromeEnterprise+DVC"
+"Running version 52 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
@@ -237,15 +237,15 @@ Function TestExistance-ItemProperty($path, $name) {
 }
 
 Function UpdateOrCreate-ItemProperty($path, $name, $value, $propertytype) {
-    Write-Verbose "UorC-IP $path $name"
+    Write-Output "UorC-IP $path $name"
 	if (TestExistance-ItemProperty -Path $path -Name $name) {
 		$curValue = Get-ItemPropertyValue -Path $path -Name $name
 		if ($curValue -ne $value) {
-			Write-Verbose "     Setting"
+			Write-Output "     Setting"
 			Set-ItemProperty -Path $path -Name $name -Value $value
 			return $true
 		} else {
-			Write-Verbose "     Not Setting"
+			Write-Output "     Not Setting"
 			return $false
 		}
 	} else {
