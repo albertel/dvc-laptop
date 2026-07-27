@@ -9,4 +9,4 @@ pushd "User Data"
 popd
 tar -c -v -z -f UserData.test.tgz "User Data"
 #scp UserData.tgz dvc@10.50.7.1:/var/www/html/UserData.tgz
-scp UserData.tgz dvc@192.168.1.193:/var/www/html/UserData.tgz
+scp UserData.test.tgz dvc@192.168.1.193:/var/www/html/UserData.tgz
