@@ -5,7 +5,7 @@
 #  - move autodisable to function call
 
 Set-StrictMode -version latest
-"Running version 47 w/ChromeEnterprise+DVC"
+"Running version 48 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 $ipAddr="192.168.1.193"
@@ -298,14 +298,17 @@ foreach ($resolution in $resolutions) {
     	}
 }
 
-# Set Ethernet to Metered
+"Set Ethernet to Metered"
 $nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
 foreach ($nicGUID in $nicGUIDs) {
+	"foreach $nicGUID"
 	$regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
 	if (!(Test-Path -Path $regPath)) {
 		New-Item $regpath -Force
 	}
+	" ... $regpath"
 	if (UpdateOrCreate-ItemProperty -Path $regpath -Name UserCost -Value 2 -PropertyType DWORD) {
+		"... Doing restart for $regpath"
 		Restart-Service -Name DusmSvc -Force
 	} else {
 		"Skipping restart"
