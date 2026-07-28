@@ -8,9 +8,9 @@ Set-StrictMode -version latest
 "Running version 54 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
-$ipAddr="192.168.1.193"
+# $ipAddr="192.168.1.193"
 # DVC
-# $ipAddr="10.50.7.1"
+$ipAddr="10.50.7.1"
 
 "Stopping Chrome in case it started"
 Get-Process -name Chrome | Stop-Process 
