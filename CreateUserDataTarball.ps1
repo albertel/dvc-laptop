@@ -1,5 +1,7 @@
 cd C:\Users\DVC_volunteer\AppData\Local\Google\Chrome
-tar -c -f C:\Users\DVC_volunteer\Downloads\UserDataStart.tar "User Data\Default\Local Storage\leveldb" "User Data\Default\Local Extension Settings\nlmmgnhgdeffjkdckmikfpnddkbbfkkk" "User Data\Default\Bookmarks"
+tar -c -f C:\Users\DVC_volunteer\Downloads\UserDataStart.tar "User Data\Default\Local Storage\leveldb" "User Data\Default\Local Extension Settings\nlmmgnhgdeffjkdckmikfpnddkbbfkkk" "User Data\Default\Bookmarks" "User Data\Default\Sync Extension Settings\nlmmgnhgdeffjkdckmikfpnddkbbfkkk"
+# "User Data/Default/Preferences"
+# "User Data/Default/Secure Preferences"
 cd C:\Users\DVC_volunteer\Downloads
 rm -r temp
 mkdir temp
@@ -8,5 +10,5 @@ tar -x -f ..\UserDataStart.tar
 pushd "User Data"
 popd
 tar -c -v -z -f UserData.test.tgz "User Data"
-scp UserData.test.tgz dvc@10.50.7.1:/var/www/html/UserData.tgz
-#scp UserData.test.tgz guy@192.168.1.193:/var/www/html/UserData.tgz
+#scp UserData.test.tgz dvc@10.50.7.1:/var/www/html/UserData.tgz
+scp UserData.test.tgz guy@192.168.1.193:/var/www/html/UserData.tgz
