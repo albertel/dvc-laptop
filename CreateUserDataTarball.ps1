@@ -10,5 +10,5 @@ tar -x -f ..\UserDataStart.tar
 pushd "User Data"
 popd
 tar -c -v -z -f UserData.test.tgz "User Data"
-#scp UserData.test.tgz dvc@10.50.7.1:/var/www/html/UserData.tgz
-scp UserData.test.tgz guy@192.168.1.193:/var/www/html/UserData.tgz
+scp UserData.test.tgz dvc@10.50.7.1:/var/www/html/UserData.tgz
+#scp UserData.test.tgz guy@192.168.1.193:/var/www/html/UserData.tgz
