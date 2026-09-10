@@ -8,11 +8,13 @@ hosts=[
 ] + ["dvc-%02d"%n for n in range(25)]
 
 cmd="ipconfig"
-
+cmd_args=[]
+#cmd="shutdown"
+#cmd_args=["/s", "/t", "5"]
 def do_shutdown(host, **kwargs):
     time.sleep(3*random.random())
-    winrmsession = winrm.Session(host, auth=("PTA_admin", "uni cycle"), transport="ntlm")
-    r=winrmsession.run_cmd(cmd)
+    winrmsession = winrm.Session(host, auth=("PTA_admin", "unicycle"), transport="ntlm")
+    r=winrmsession.run_cmd(cmd, cmd_args)
     print("%s\n\n%s\n------------\n%s\n" % (
         host, r.std_out.decode('ascii'), r.std_err.decode('ascii')))
     if r.status_code:
