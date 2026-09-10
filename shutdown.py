@@ -13,7 +13,7 @@ cmd_args=[]
 #cmd_args=["/s", "/t", "5"]
 def do_shutdown(host, **kwargs):
     time.sleep(3*random.random())
-    winrmsession = winrm.Session(host, auth=("PTA_admin", "unicycle"), transport="ntlm")
+    winrmsession = winrm.Session(host, auth=("PTA_admin", ""), transport="ntlm")
     r=winrmsession.run_cmd(cmd, cmd_args)
     print("%s\n\n%s\n------------\n%s\n" % (
         host, r.std_out.decode('ascii'), r.std_err.decode('ascii')))
