@@ -1,19 +1,22 @@
 import random
+import sys
 import threading
 import time
 import winrm
 
 hosts=[
     "dvc-808",
-] + ["dvc-%02d"%n for n in range(25)]
+    ]
+#] + ["dvc-%02d"%n for n in range(25)]
 
 cmd="ipconfig"
 cmd_args=[]
 #cmd="shutdown"
 #cmd_args=["/s", "/t", "5"]
+
 def do_shutdown(host, **kwargs):
     time.sleep(3*random.random())
-    winrmsession = winrm.Session(host, auth=("PTA_admin", ""), transport="ntlm")
+    winrmsession = winrm.Session(host, auth=(sys.argv[1], sys.argv[2]), transport="ntlm")
     r=winrmsession.run_cmd(cmd, cmd_args)
     print("%s\n\n%s\n------------\n%s\n" % (
         host, r.std_out.decode('ascii'), r.std_err.decode('ascii')))
@@ -25,7 +28,9 @@ def log_failed_hosts(args):
     failures[args.thread.name] = "%s" % args.exc_value
     
 def main():
-    print("Stating Shutdown")
+    if len(sys.argv) != 3:
+        exit("Usage: %s username password" % sys.argv[0])
+    print("Stating Shutdown as user %s pw %s" % (sys.argv[1], sys.argv[2]))
     threading.excepthook=log_failed_hosts
     threads = []
     for host in hosts:
