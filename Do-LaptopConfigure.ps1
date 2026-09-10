@@ -3,6 +3,7 @@
 #  - Pin chrome to taskbar (impossible?)
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 #  - move autodisable to function call
+#  - disable winrm needs to be done
 
 Set-StrictMode -version latest
 "Running version 54 w/ChromeEnterprise+DVC"
@@ -17,6 +18,7 @@ Get-Process -name Chrome | Stop-Process
 
 # Attempts to reset various global settings on the machine 
 Function Reset {
+    # Need to integrate https://4sysops.com/archives/disable-powershell-remoting-disable-psremoting-winrm-listener-firewall-and-localaccounttokenfilterpolicy/
 	# Disabling the autoremove
 	"Remove Chrome Autostart"
 	$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
