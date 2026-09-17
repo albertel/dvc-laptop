@@ -1,21 +1,33 @@
+import argparse
+import random
+import sys
 import threading
 import time
 import winrm
 
+parser = argparse.ArgumentParser(
+    prog="shutdown.py",
+    description="Remote Command Execution script")
+parser.add_argument('-i', '--interactive', action='store_true')
+parser.add_argument('-u', '--username', required=True)
+parser.add_argument('-p', '--password', required=True)
+
 hosts=[
     #"dvc-808",
-] + ["10.50.8.%d"%n for n in range(1,7)]
+] + ["10.50.8.%d"%n for n in range(21,22)]
 
 cmd="ipconfig"
 cmd_args=[]
-cmd="shutdown"
-cmd_args=["/s", "/t", "5"]
+#cmd="shutdown"
+#cmd_args=["/s", "/t", "5"]
 max_connections=3
 semaphore=threading.Semaphore(max_connections)
 
-def do_shutdown(host, **kwargs):
+def do_shutdown(host, args, **kwargs):
     with semaphore:
-        winrmsession = winrm.Session(host, auth=(sys.argv[1], sys.argv[2]), transport="ntlm")
+        winrmsession = winrm.Session(host,
+                                     auth=(args.username, args.password),
+                                     transport="ntlm")
         r=winrmsession.run_cmd(cmd, cmd_args)
     if r.std_out or r.std_err:
         print("%s\n\n%s\n------------\n%s\n" % (
@@ -28,14 +40,14 @@ def log_failed_hosts(args):
     failures[args.thread.name] = "%s" % args.exc_value
     
 def main():
-    if len(sys.argv) != 3:
-        exit("Usage: %s username password" % sys.argv[0])
-    print("Stating Shutdown as user %s pw %s" % (sys.argv[1], sys.argv[2]))
+    args = parser.parse_args()
+    print("Stating Shutdown as user %s pw %s" % (args.username, args.password))
+
     threading.excepthook=log_failed_hosts
     threads = []
     for host in hosts:
         threads.append(threading.Thread(
-            target=do_shutdown, name=host, args=(host,)))
+            target=do_shutdown, name=host, args=(host, args)))
     print("Created")
 
     for t in threads:
