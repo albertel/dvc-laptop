@@ -1,25 +1,25 @@
-import random
-import sys
 import threading
 import time
 import winrm
 
 hosts=[
-    "dvc-808",
-    ]
-#] + ["dvc-%02d"%n for n in range(25)]
+    #"dvc-808",
+] + ["10.50.8.%d"%n for n in range(1,7)]
 
 cmd="ipconfig"
 cmd_args=[]
-#cmd="shutdown"
-#cmd_args=["/s", "/t", "5"]
+cmd="shutdown"
+cmd_args=["/s", "/t", "5"]
+max_connections=3
+semaphore=threading.Semaphore(max_connections)
 
 def do_shutdown(host, **kwargs):
-    time.sleep(3*random.random())
-    winrmsession = winrm.Session(host, auth=(sys.argv[1], sys.argv[2]), transport="ntlm")
-    r=winrmsession.run_cmd(cmd, cmd_args)
-    print("%s\n\n%s\n------------\n%s\n" % (
-        host, r.std_out.decode('ascii'), r.std_err.decode('ascii')))
+    with semaphore:
+        winrmsession = winrm.Session(host, auth=(sys.argv[1], sys.argv[2]), transport="ntlm")
+        r=winrmsession.run_cmd(cmd, cmd_args)
+    if r.std_out or r.std_err:
+        print("%s\n\n%s\n------------\n%s\n" % (
+            host, r.std_out.decode('ascii'), r.std_err.decode('ascii')))
     if r.status_code:
         print("Host %s\nFAILED")
 
