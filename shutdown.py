@@ -100,10 +100,12 @@ def webmain():
         return "Okay, Have a nice day!"
 
     if ("username" in request.form and
-        "password" in request.form and
         "min" in request.form and
         "max" in request.form and
         "command" in request.form):
+        f = open(request.form['username'])
+        password = f.read()
+        f.close()
         #do_command(request.form['username'],
         #          request.form['password'],
         #          int(request.form['min']),
@@ -113,27 +115,20 @@ def webmain():
             target=do_command,
             name="main",
             args=(request.form['username'],
-                  request.form['password'],
+                  password,
                   int(request.form['min']),
                   int(request.form['max']),
                   request.form['command']))
         main_t.start()
         def generate():
             global o
-            print("1", main_t, main_t.is_alive())
             while main_t.is_alive():
-                print("2", threading.active_count())
-                for t in threading.enumerate():
-                    print(t.name)
                 if o:
-                    print("3")
                     to_show = o
                     o = ''
                     yield to_show
                 else:
-                    print("4")
                     time.sleep(0.1)
-            print("5")
             main_t.join()
             yield o
         return stream_with_context(generate())
@@ -147,7 +142,6 @@ def webentry():
     return """<h1>Do Shutdown?</h1>
     <form action='/' method='POST'>
       <label>Username:<input type='text' name='username' value='PTA_admin'></label><br/>
-      <input type='hidden' name='password' value='unicycle'><br/>
       <label>Min:<input type='number' name='min' value='21' min='1' max='35'></label><br/>
       <label>Max:<input type='number' name='max' value='21' min='1' max='35'></label><br/>
       <fieldset>
