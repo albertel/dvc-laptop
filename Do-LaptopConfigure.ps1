@@ -325,6 +325,9 @@ Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -conf
 # Set network to private
 Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
 
+# Run winrm to make sure remoting is allowed
+Start-Process -NoNewWindow -Wait -FilePath winrm -ArgumentList @("quickconfig", "-quiet")
+
 # Make windows update not run
 $startDate = "2026-07-07T00:00:00Z"
 $endDate = "2026-11-07T00:00:00Z"
