@@ -216,8 +216,8 @@ def webentry():
     
     <form action='/' method='POST'>
       Which machines:<br/>
-      <label>Min:<input type='number' name='min' value='1' min='1' max='41'></label> through
-    <label>Max:<input type='number' name='max' value='41' min='1' max='41'></label><br/><br/>
+      <input type='number' name='min' value='1' min='1' max='41'> through
+      <input type='number' name='max' value='41' min='1' max='41'><br/><br/>
       
       <input type='submit' name='YES' value='YES' />
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
