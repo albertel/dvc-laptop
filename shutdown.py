@@ -34,10 +34,10 @@ def do_shutdown(host, username, password, which_command, **kwargs):
                                      transport="ntlm")
         r=winrmsession.run_cmd(which_command, cmd[which_command])
     if r.std_out or r.std_err:
-        output("%s\n\n%s\n------------\n%s\n" % (
+        prepend('machine_output', "%s\n\n%s\n------------\n%s\n" % (
             host, r.std_out.decode('ascii'), r.std_err.decode('ascii')))
     if r.status_code:
-        output("Host %s\nFAILED")
+        prepend('machine_output', "Host %s\nFAILED" % host)
 
 failures={}
 def log_failed_hosts(args):
@@ -49,7 +49,31 @@ def output(line):
         print(line)
     else:
         print(line)
-        o += "<pre>" + line + "\n</pre>"
+        o += "<pre>" + line + "</pre>\n"
+
+def replace(which, line):
+    global o
+    print(line)
+    o += '''<script type="text/javascript">
+    ''' + which + '''.innerHTML = "<pre>''' + line + '''</pre>";
+    </script>\n
+    '''
+
+def append(which, line):
+    global o
+    print(line)
+    o += '''<script type="text/javascript">
+    ''' + which + '''.insertAdjacentHTML("beforeend", "<pre>''' + line + '''</pre>");
+    </script>\n
+    '''
+
+def prepend(which, line):
+    global o
+    print(line)
+    o += '''<script type="text/javascript">
+    ''' + which + '''.insertAdjacentHTML("afterbegin", "<pre>''' + line + '''</pre>");
+    </script>\n
+    '''
 
 def do_command(username, password, min, max, which_command):
     threading.excepthook=log_failed_hosts
@@ -65,11 +89,9 @@ def do_command(username, password, min, max, which_command):
             target=do_shutdown,
             name=host,
             args=(host, username, password, which_command)))
-    output("Created")
 
     for t in threads:
         t.start()
-    output("Started")
 
     alive = threads
     while alive:
@@ -79,22 +101,69 @@ def do_command(username, password, min, max, which_command):
                 still_alive.append(t)
             else:
                 t.join()
-                output("Finished %s" % t.name)
+                append('status', "Finished %s" % t.name)
         alive = still_alive
         if alive:
-            output("Still running: " + ', '.join(t.name for t in alive))
+            replace('status',
+                    "%d todo" % len(alive))
         if failures:
-            output("Fail count: %d" % len(failures.keys()))
+            append('status',
+                   "%d failed" % len(failures.keys()))
         time.sleep(1)
 
     if failures:
-        output("Failures")
+        append('failures', "Failed: %s" % (', '.join(sorted(failures.keys()))))
         for k in sorted(failures):
-            output("Host %s: %s" % (k, failures[k]))
+            append('failures',
+                   "Host %s: %s" % (k, failures[k]))
+
+def output_header():
+    return """
+    <html>
+      <head>
+        <style>
+         #status {
+           border-style: outset;
+           display: inline-block;
+           padding: 0 30px 0 30px; 
+         }
+         #failures {
+           overflow: scroll;
+           max-height: 100px;
+           border-style: groove;
+         }
+         #machine_output {
+           overflow: scroll;
+           max-height: 100px;
+           border-style: groove;
+         }
+        </style>
+      </head>
+      <body>
+        <marquee behavior="alternate">
+        <div id="status">
+        </div></marquee>
+        <p>
+          Failure messages:
+        </p>
+        <div id="failures">
+        </div>
+        <p>
+          Output from machines:
+        </p>
+        <div id="machine_output">
+        </div>
+        <script type='text/javascript'>
+          const status = document.getElementById("status");
+          const failures = document.getElementById("failures");
+        </script>
+    """
 
 @app.route("/", methods=['POST'])
 def webmain():
-    global o, is_interactive
+    global o, failures, is_interactive
+    o=''
+    failures={}
     is_interactive = False
     if "NO" in request.form:
         return "Okay, Have a nice day!"
@@ -106,11 +175,6 @@ def webmain():
         f = open(request.form['username'])
         password = f.read()
         f.close()
-        #do_command(request.form['username'],
-        #          request.form['password'],
-        #          int(request.form['min']),
-        #          int(request.form['max']),
-        #          request.form['command']))
         main_t = threading.Thread(
             target=do_command,
             name="main",
@@ -122,6 +186,7 @@ def webmain():
         main_t.start()
         def generate():
             global o
+            yield output_header()
             while main_t.is_alive():
                 if o:
                     to_show = o
@@ -130,31 +195,46 @@ def webmain():
                 else:
                     time.sleep(0.1)
             main_t.join()
+            replace('status', "Completed")
             yield o
         return stream_with_context(generate())
 
     else:
-        output("<p>Missing Data</p>")
+        return "<p>Missing Data</p>"
     return "Command result: " + o
 
 @app.route("/", methods=['GET'])
 def webentry():
-    return """<h1>Do Shutdown?</h1>
+    return """<h1>DVC PHONEBANK SHUTDOWN</h1>
+    <div>
+    Are you sure? All selected laptops will automatically shutdown stopping any ongoing phonebanking.<br/><br/>
+
+    Turn off power (using phone app) AFTER shutdown completes.<br/><br/>
+
+    Thank you.<br/><br/>
+    </div>
+    
     <form action='/' method='POST'>
+      Which machines:<br/>
+      <label>Min:<input type='number' name='min' value='1' min='1' max='41'></label> through
+    <label>Max:<input type='number' name='max' value='41' min='1' max='41'></label><br/><br/>
+      
+      <input type='submit' name='YES' value='YES' />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <input type='submit' name='NO' value='NO' />
+      <hr/>
+      <div style="position: fixed; bottom: 0;">
+      <p>Some Options for Guy/Lawerance:</p>
+    
       <label>Username:<input type='text' name='username' value='PTA_admin'></label><br/>
-      <label>Min:<input type='number' name='min' value='21' min='1' max='35'></label><br/>
-      <label>Max:<input type='number' name='max' value='21' min='1' max='35'></label><br/>
       <fieldset>
         <legend>Which Command?</legend>
         <div>
-           <label>Shutdown <input type='radio' name='command' value='shutdown' /></label>
-           <label>IpConfig <input type='radio' name='command' value='ipconfig' checked/></label>
+           <label>Shutdown <input type='radio' name='command' value='shutdown' checked/></label>
+           <label>IpConfig <input type='radio' name='command' value='ipconfig'/></label>
         </div>
       </fieldset>
-      <br/>
-      <input type='submit' name='YES' value='YES'>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <input type='submit' name='NO' value='NO'>
+      </div>
     </form>"""
 
 def main():
