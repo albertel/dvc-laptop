@@ -322,6 +322,9 @@ foreach ($nicGUID in $nicGUIDs) {
 Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
 Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -confirm:$false
 
+# Set network to private
+Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
+
 # Make windows update not run
 $startDate = "2026-07-07T00:00:00Z"
 $endDate = "2026-11-07T00:00:00Z"
