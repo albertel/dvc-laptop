@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 63 w/ChromeEnterprise+DVC"
+"Running version 64 w/ChromeEnterprise+DVC-Disable"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -16,46 +16,34 @@ Get-Process -name Chrome | Stop-Process
 
 # Attempts to reset various global settings on the machine 
 Function Reset {
-	$nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
-	foreach ($nicGUID in $nicGUIDs) {
-		$regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
-		Remove-ItemProperty -Path $regpath -Name UserCost
+	# Set up a scheduled task on Logon to ask some input and download and run the branched version.
+	$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\DVC_volunteer\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/De-ConfigureLaptop.ps1 -OutFile De-ConfigureLaptop.ps1; .\De-ConfigureLaptop.ps1"'
+	$taskName = "LaptopConfigure"
+	$createTask = $true
+	$task=Get-ScheduledTask | Where {$_.TaskName -eq $taskName}
+	if ($task -ne $null) {
+  		"Found the Task $($task.TaskName)"
+  		if ($task.Actions.Arguments -ne $args) {
+     		"Needs updating"
+     		Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+  		} else {
+     		"Looks good, leaving it alone"
+     		$createTask = $false
+  		}
 	}
 
-	Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Enable-NetAdapter -confirm:$false
-	Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Enable-NetAdapter -confirm:$false
-
-	$winUpPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"
-	Remove-ItemProperty -Name "PauseUpdatesStartTime" -Path $winUpPath
-	Remove-ItemProperty -Name "PauseUpdatesExpiryTime" -Path $winUpPath
-	Remove-ItemProperty -Name "PauseQualityUpdatesStartTime" -Path $winUpPath
-	Remove-ItemProperty -Name "PauseQualityUpdatesExpiryTime" -Path $winUpPath
-	Remove-ItemProperty -Name "PauseFeatureUpdatesStartTime" -Path $winUpPath
-	Remove-ItemProperty -Name "PauseFeatureUpdatesExpiryTime" -Path $winUpPath
-	
-	# Disable screen timeout
-	powercfg -change -monitor-timeout-ac 15
-	powercfg -change -monitor-timeout-dc 5
-	powercfg -change -standby-timeout-ac 0
-	powercfg -change -standby-timeout-dc 60
-
-	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\Policies\Google\Chrome"
-	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\Policies\Google\Update"
-	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\Google\Chrome"
-	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\WOW6432Node\Google\Enrollment"
-
-	(Get-WmiObject -class Lenovo_SetBiosSetting -namespace root\wmi).SetBiosSetting("OnByAcAttach,Disable")
-	(Get-WmiObject -class Lenovo_SaveBiosSettings -namespace root\wmi).SaveBiosSettings()
-
-	Disable-PSRemoting -Force
-	Stop-Service WinRM -PassThru
-	Set-Service WinRM -StartupType Disabled -PassThru
-	Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "LocalAccountTokenFilterPolicy" -Value 0
-	Set-ExecutionPolicy -Force:$true -ExecutionPolicy Undefined
-	Unregister-ScheduledTask -TaskName 'LaptopConfigure' -Confirm:$false
-	Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
+	if ($createTask) {
+  		"Creating task"
+  		$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $args
+  		$trigger = New-ScheduledTaskTrigger -AtLogOn
+  		$settings = New-ScheduledTaskSettingsSet
+  		$principal = New-ScheduledTaskPrincipal -UserId "DVC_volunteer" -RunLevel Highest
+  		$task = New-ScheduledTask -Principal $principal -Action $action -Trigger $trigger -Settings $settings 
+  		Register-ScheduledTask -TaskName $taskName -InputObject $task
+	}
 	Exit
 }
+Reset
 
 # Persistant global load of external function.
 $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
