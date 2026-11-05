@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 59 w/ChromeEnterprise+DVC-DisableMode"
+"Running version 60 w/ChromeEnterprise+DVC-DisableMode"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -52,8 +52,8 @@ Function Reset {
 	Set-Service WinRM -StartupType Disabled -PassThru
 	Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "LocalAccountTokenFilterPolicy" -Value 0
 	Set-ExecutionPolicy -Force:$true -ExecutionPolicy Undefined
-	#Unregister-ScheduledTask -TaskName 'LaptopConfigure' -Confirm:$false
-	#Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
+	Unregister-ScheduledTask -TaskName 'LaptopConfigure' -Confirm:$false
+	Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
 	Exit
 }
 Reset
