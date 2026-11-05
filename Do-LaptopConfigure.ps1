@@ -56,7 +56,6 @@ Function Reset {
 	Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
 	Exit
 }
-Reset
 
 # Persistant global load of external function.
 $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
