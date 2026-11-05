@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 56 w/ChromeEnterprise+DVC-Disable"
+"Running version 57 w/ChromeEnterprise+DVC-Disable"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -39,14 +39,15 @@ Function Reset {
 	powercfg -change -standby-timeout-ac 0
 	powercfg -change -standby-timeout-dc 60
 
-	Remove-Item -Path "HKLM:\SOFTWARE\Policies\Google\Chrome" -Recurse
-	Remove-Item -Path "HKLM:\SOFTWARE\Policies\Google\Update" -Recurse
-	Remove-Item -Path "HKLM:\SOFTWARE\Google\Chrome" -Recurse
-
+	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\Policies\Google\Chrome"
+	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\Policies\Google\Update"
+	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\Google\Chrome"
+	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\WOW6432Node\Google\Enrollment"
+	
 	Disable-PSRemoting -Force
 	Stop-Service WinRM -PassThru
 	Set-Service WinRM -StartupType Disabled -PassThru
-	Set-ItemProperty -Path "HKLM:\SOFTWARE\Micorsoft\Windows\CurrentVersion\Policies\System" -Name "LocalAccountTokenFilterPolicy" -Value 0
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "LocalAccountTokenFilterPolicy" -Value 0
 	Set-ExecutionPolicy -Force:$true -ExecutionPolicy Undefined
 	#Unregister-ScheduledTask -TaskName 'LaptopConfigure' -Confirm:$false
 	#Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
