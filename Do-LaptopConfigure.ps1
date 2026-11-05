@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 55 w/ChromeEnterprise+DVC-Disable"
+"Running version 56 w/ChromeEnterprise+DVC-Disable"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -53,7 +53,7 @@ Function Reset {
 	#Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
 	Exit
 }
-Reset()
+Reset
 
 # Persistant global load of external function.
 $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
