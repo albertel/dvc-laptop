@@ -18,7 +18,7 @@ Get-Process -name Chrome | Stop-Process
 Function Reset {
 	# Set up a scheduled task on Logon to ask some input and download and run the branched version.
 	$args='-command "Set-ExecutionPolicy -Force:$true -ExecutionPolicy RemoteSigned; cd \Users\DVC_volunteer\Downloads; rm  -ErrorAction Ignore Do-LaptopConfigure.ps1;Invoke-WebRequest -Uri https://raw.githubusercontent.com/albertel/dvc-laptop/refs/heads/'+$branch+'/De-ConfigureLaptop.ps1 -OutFile De-ConfigureLaptop.ps1; .\De-ConfigureLaptop.ps1"'
-	$taskName = "LaptopConfigure"
+	$taskName = "LaptopDeConfigure"
 	$createTask = $true
 	$task=Get-ScheduledTask | Where {$_.TaskName -eq $taskName}
 	if ($task -ne $null) {
