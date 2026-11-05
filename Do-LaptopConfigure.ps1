@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 62 w/ChromeEnterprise+DVC-DisableMode"
+"Running version 63 w/ChromeEnterprise+DVC"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
