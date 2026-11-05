@@ -39,10 +39,9 @@ Function Reset {
 	powercfg -change -standby-timeout-ac 0
 	powercfg -change -standby-timeout-dc 60
 
-	Remove-Item -Path "HKLM:\SOFTWARE\Policies\Google\Chrome"
-	Remove-Item -Path "HKLM:\SOFTWARE\Policies\Google\Update"
-	Remove-Item -Path "HKLM:\SOFTWARE\Google\Chrome"
-	Remove-Item -Path "HKLM:\SOFTWARE\WOW6432Node\Google\Enrollement"
+	Remove-Item -Path "HKLM:\SOFTWARE\Policies\Google\Chrome" -Recurse
+	Remove-Item -Path "HKLM:\SOFTWARE\Policies\Google\Update" -Recurse
+	Remove-Item -Path "HKLM:\SOFTWARE\Google\Chrome" -Recurse
 
 	Disable-PSRemoting -Force
 	Stop-Service WinRM -PassThru
