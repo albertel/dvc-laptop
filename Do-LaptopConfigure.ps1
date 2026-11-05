@@ -2,11 +2,9 @@
 #  - More aggressive bluetooth disable
 #  - Pin chrome to taskbar (impossible?)
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
-#  - move autodisable to function call
-#  - disable winrm needs to be done
 
 Set-StrictMode -version latest
-"Running version 54 w/ChromeEnterprise+DVC"
+"Running version 55 w/ChromeEnterprise+DVC-Disable"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -18,33 +16,44 @@ Get-Process -name Chrome | Stop-Process
 
 # Attempts to reset various global settings on the machine 
 Function Reset {
-    # Need to integrate https://4sysops.com/archives/disable-powershell-remoting-disable-psremoting-winrm-listener-firewall-and-localaccounttokenfilterpolicy/
-	# Disabling the autoremove
-	"Remove Chrome Autostart"
-	$runPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\run"
-	$name = "Google_chrome"
-	Remove-ItemProperty -Path $runPath -Name $name
+	$nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
+	foreach ($nicGUID in $nicGUIDs) {
+		$regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
+		Remove-ItemProperty -Path $regpath -Name UserCost
+	}
 
-	#"Stopping Chrome in case it started"
-	Get-Process -name Chrome | Stop-Process 
-	Start-Sleep -Seconds 5
+	Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Enable-NetAdapter -confirm:$false
+	Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Enable-NetAdapter -confirm:$false
 
-	#"Deleting All Profiles"
-	Get-ChildItem "$($env:LOCALAPPDATA)\Google\Chrome\User Data\" | Where {$_.Name -like "Default" -or $_.Name -like "Profile*"} | Remove-Item -Recurse
-	Remove-Item -Path "$($env:LOCALAPPDATA)\Google\Chrome\User Data\Local state"
-
-	"Removing Scheduled Task"
-	$taskName = "LaptopConfigure"
-	Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
-	"Done"
-
-	#MISSING
-	# Wired/Bluetooth adapters disabled
-	# Windows Update disabled
-	# Wired set to metered
+	$winUpPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"
+	Remove-ItemProperty -Name "PauseUpdatesStartTime" -Path $winUpPath
+	Remove-ItemProperty -Name "PauseUpdatesExpiryTime" -Path $winUpPath
+	Remove-ItemProperty -Name "PauseQualityUpdatesStartTime" -Path $winUpPath
+	Remove-ItemProperty -Name "PauseQualityUpdatesExpiryTime" -Path $winUpPath
+	Remove-ItemProperty -Name "PauseFeatureUpdatesStartTime" -Path $winUpPath
+	Remove-ItemProperty -Name "PauseFeatureUpdatesExpiryTime" -Path $winUpPath
 	
+	# Disable screen timeout
+	powercfg -change -monitor-timeout-ac 15
+	powercfg -change -monitor-timeout-dc 5
+	powercfg -change -standby-timeout-ac 0
+	powercfg -change -standby-timeout-dc 60
+
+	Remove-Item -Path "HKLM:\SOFTWARE\Policies\Google\Chrome"
+	Remove-Item -Path "HKLM:\SOFTWARE\Policies\Google\Update"
+	Remove-Item -Path "HKLM:\SOFTWARE\Google\Chrome"
+	Remove-Item -Path "HKLM:\SOFTWARE\WOW6432Node\Google\Enrollement"
+
+	Disable-PSRemoting -Force
+	Stop-Service WinRM -PassThru
+	Set-Service WinRM -StartupType Disabled -PassThru
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Micorsoft\Windows\CurrentVersion\Policies\System" -Name "LocalAccountTokenFilterPolicy" -Value 0
+	Set-ExecutionPolicy -Force:$true -ExecutionPolicy Undefined
+	#Unregister-ScheduledTask -TaskName 'LaptopConfigure' -Confirm:$false
+	#Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
 	Exit
 }
+Reset()
 
 # Persistant global load of external function.
 $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
