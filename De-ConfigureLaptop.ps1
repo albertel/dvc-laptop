@@ -29,5 +29,17 @@ Remove-Item -Recurse -Path "HKLM:\SOFTWARE\WOW6432Node\Google\Enrollment"
 (Get-WmiObject -class Lenovo_SetBiosSetting -namespace root\wmi).SetBiosSetting("OnByAcAttach,Disable")
 (Get-WmiObject -class Lenovo_SaveBiosSettings -namespace root\wmi).SaveBiosSettings()
 
-Unregister-ScheduledTask -TaskName 'LaptopConfigure' -Confirm:$false
 
+Disable-PSRemoting -Force
+Stop-Service WinRM -PassThru
+Set-Service WinRM -StartupType Disabled -PassThru
+
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "LocalAccountTokenFilterPolicy" -Value 0
+Set-ExecutionPolicy -Force:$true -ExecutionPolicy Undefined
+Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
+
+Start-Sleep -Seconds 60
+Unregister-ScheduledTask -TaskName 'LaptopConfigure' -Confirm:$false
+Unregister-ScheduledTask -TaskName 'LaptopDeConfigure' -Confirm:$false
+Remove-LocalUser -Name DVC_volunteer
+Start-Sleep -Seconds 60
