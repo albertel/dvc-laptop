@@ -60,3 +60,4 @@ Unregister-ScheduledTask -TaskName 'LaptopDeConfigure' -Confirm:$false
 Remove-LocalUser -Name DVC_volunteer
 
 "Good night"
+Start-Sleep -Seconds 5
