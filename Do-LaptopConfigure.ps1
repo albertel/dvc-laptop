@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 57 w/ChromeEnterprise+DVC-Disable"
+"Running version 58 w/ChromeEnterprise+DVC-DisableMode"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -43,7 +43,10 @@ Function Reset {
 	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\Policies\Google\Update"
 	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\Google\Chrome"
 	Remove-Item -Recurse -Path "HKLM:\SOFTWARE\WOW6432Node\Google\Enrollment"
-	
+
+	Get-WmiObject -class Lenovo_SetBiosSetting –namespace root\wmi).SetBiosSetting("OnByAcAttach,Disable")
+	Get-WmiObject -class Lenovo_SaveBiosSettings -namespace root\wmi).SaveBiosSettings()
+
 	Disable-PSRemoting -Force
 	Stop-Service WinRM -PassThru
 	Set-Service WinRM -StartupType Disabled -PassThru
