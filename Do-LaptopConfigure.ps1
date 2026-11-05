@@ -4,7 +4,7 @@
 #  - Would be better if we examined the possible screen resolutions and picked one rather then trying a bunch from a list
 
 Set-StrictMode -version latest
-"Running version 60 w/ChromeEnterprise+DVC-DisableMode"
+"Running version 61 w/ChromeEnterprise+DVC-DisableMode"
 $branch="main"
 # home
 # $ipAddr="192.168.1.193"
@@ -298,7 +298,7 @@ if ($createTask) {
   Register-ScheduledTask -TaskName $taskName -InputObject $task
 }
 
-# Set Screen resolution
+"Set Screen resolution"
 $resolutions = @(
 	@(1920, 1080),
  	@(1600, 900),
@@ -329,18 +329,18 @@ foreach ($nicGUID in $nicGUIDs) {
 	}
 }
 
-# Hide Wi-Fi and Bluetooth
+"Hide Wi-Fi and Bluetooth"
 # Disable hiding wi-fi
 Get-NetAdapter | Where {$_.Name -like "*Wi-Fi*" } | Disable-NetAdapter -confirm:$false
 Get-NetAdapter | Where {$_.Name -like "*bluetooth*" } | Disable-NetAdapter -confirm:$false
 
-# Set network to private
+"Set network to private"
 Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
 
-# Run winrm to make sure remoting is allowed
+"Run winrm to make sure remoting is allowed"
 Start-Process -NoNewWindow -Wait -FilePath winrm -ArgumentList @("quickconfig", "-quiet")
 
-# Make windows update not run
+"Make windows update not run"
 $startDate = "2026-07-07T00:00:00Z"
 $endDate = "2026-11-07T00:00:00Z"
 $winUpPath = "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"
@@ -355,7 +355,7 @@ Set-ItemProperty -Name "PauseFeatureUpdatesExpiryTime" -Path $winUpPath -Value $
 "Fix Mouse Speed"
 Set-MouseSpeed -newSpeed 10
 
-# Disable screen timeout
+"Disable screen timeout"
 powercfg -change -monitor-timeout-ac 0
 powercfg -change -monitor-timeout-dc 0
 powercfg -change -standby-timeout-ac 0
@@ -410,7 +410,11 @@ if ($winApi::SystemParametersInfo(0x0057,0,$null,0)) {
 	"Failed Reload Cursor"
 }
 
-# Download UserData.tgz
+"Set BIOS to Boot on AC Attach"
+(Get-WmiObject -class Lenovo_SetBiosSetting –namespace root\wmi).SetBiosSetting("OnByAcAttach,Enable")
+(Get-WmiObject -class Lenovo_SaveBiosSettings -namespace root\wmi).SaveBiosSettings()
+
+"Download UserData.tgz"
 Function Reset-UserData {
 	"Getting User Data tarball"
 	cd \Users\DVC_volunteer\Downloads
