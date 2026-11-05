@@ -1,3 +1,4 @@
+"Deconfigure Laptop Version 1"
 $nicGUIDs = (Get-NetAdapter | Where {$_.Name -like "*ethernet*"}).InterfaceGuid
 foreach ($nicGUID in $nicGUIDs) {
 	$regpath = "HKLM:\SOFTWARE\Microsoft\DusmSvc\Profiles\$nicGUID\*"
