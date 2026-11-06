@@ -55,7 +55,7 @@ def replace(which, line):
     global o
     print(line)
     o += '''<script type="text/javascript">
-    ''' + which + '''.innerHTML = "<pre>''' + line + '''</pre>";
+    ''' + which + '''.innerHTML = `<pre>''' + line + '''</pre>`;
     </script>\n
     '''
 
@@ -63,7 +63,7 @@ def append(which, line):
     global o
     print(line)
     o += '''<script type="text/javascript">
-    ''' + which + '''.insertAdjacentHTML("beforeend", "<pre>''' + line + '''</pre>");
+    ''' + which + '''.insertAdjacentHTML("beforeend", `<pre>''' + line + '''</pre>`);
     </script>\n
     '''
 
@@ -71,7 +71,7 @@ def prepend(which, line):
     global o
     print(line)
     o += '''<script type="text/javascript">
-    ''' + which + '''.insertAdjacentHTML("afterbegin", "<pre>''' + line + '''</pre>");
+    ''' + which + '''.insertAdjacentHTML("afterbegin", `<pre>''' + line + '''</pre>`);
     </script>\n
     '''
 
@@ -140,9 +140,12 @@ def output_header():
         </style>
       </head>
       <body>
-        <marquee behavior="alternate">
+        <div style="width: 100%">
+        <marquee direction="left" behavior="alternate">
         <div id="status">
         </div></marquee>
+        </div>
+        <hr/>
         <p>
           Failure messages:
         </p>
@@ -156,6 +159,7 @@ def output_header():
         <script type='text/javascript'>
           const status = document.getElementById("status");
           const failures = document.getElementById("failures");
+          const machine_output = document.getElementById("machine_output");
         </script>
     """
 
@@ -216,8 +220,8 @@ def webentry():
     
     <form action='/' method='POST'>
       Which machines:<br/>
-      <input type='number' name='min' value='1' min='1' max='41'> through
-      <input type='number' name='max' value='41' min='1' max='41'><br/><br/>
+      <input type='number' name='min' value='1' min='1' max='60'> through
+      <input type='number' name='max' value='60' min='1' max='60'><br/><br/>
       
       <input type='submit' name='YES' value='YES' />
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
