@@ -43,7 +43,6 @@ Function Reset {
 	}
 	Exit
 }
-Reset
 
 # Persistant global load of external function.
 $winApi = add-type -name user32 -namespace tq84 -passThru -memberDefinition '
